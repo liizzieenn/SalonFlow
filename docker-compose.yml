@@ -29,6 +29,10 @@ services:
     <<: *app
     command: celery -A config worker --loglevel=info
 
+  beat:
+    <<: *app
+    command: celery -A config beat --loglevel=info --schedule /tmp/celerybeat-schedule
+
   db:
     image: pgvector/pgvector:pg16
     environment:
