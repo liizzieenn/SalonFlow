@@ -15,7 +15,7 @@ from django import forms
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone, translation
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST, require_safe
 
 from apps.salons.models import Salon, Service, Staff
 
@@ -86,7 +86,7 @@ def _slots(service: Service, staff: Staff | None, day: date) -> list[datetime]:
     return available_slots(staff, service, day)
 
 
-@require_GET
+@require_safe
 def services_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     salon = _salon(salon_slug)
     services = salon.services.filter(is_active=True, staff__is_active=True).distinct()
@@ -95,7 +95,7 @@ def services_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     )
 
 
-@require_GET
+@require_safe
 def staff_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     salon = _salon(salon_slug)
     service = _service(salon, request.GET.get("service"))
@@ -108,7 +108,7 @@ def staff_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     )
 
 
-@require_GET
+@require_safe
 def dates_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     salon = _salon(salon_slug)
     service = _service(salon, request.GET.get("service"))
@@ -128,7 +128,7 @@ def dates_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     )
 
 
-@require_GET
+@require_safe
 def slots_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     salon = _salon(salon_slug)
     service = _service(salon, request.GET.get("service"))
@@ -149,7 +149,7 @@ def slots_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     )
 
 
-@require_GET
+@require_safe
 def details_step(request: HttpRequest, salon_slug: str) -> HttpResponse:
     salon = _salon(salon_slug)
     service = _service(salon, request.GET.get("service"))
