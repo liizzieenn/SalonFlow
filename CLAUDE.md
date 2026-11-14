@@ -60,7 +60,18 @@ M6 done: Georgian default (unprefixed) / English (`/en/`) via `i18n_patterns`; s
 `preferred_language` captured at booking and used for notifications; `tests/test_i18n.py`
 gates CI on catalogue completeness.
 
+M7 (code complete, live deploy pending): compiled Tailwind 4 (`static/src/app.css` →
+`npm run build`, built in the Docker image), `docker-compose.prod.yml` (Caddy HTTPS →
+gunicorn, celery, beat, db, redis) + `deploy/` (Caddyfile, deploy.sh), `docs/deploy.md`,
+`manage.py seed_demo [--reset]`, deploy workflow over SSH, CI `prod-stack` job that boots
+the real stack and smoke-tests it over HTTPS, README screenshots in `docs/screenshots/`.
+
 Notes:
+- Tailwind scans `templates/` and `apps/` (Python files that build class strings). After
+  adding classes run `npm run build` locally (or the dev compose `css` watcher).
+- Production behind Caddy: client IPs come from `apps.core.net.client_ip`
+  (`TRUSTED_PROXY_HOPS`); never read `REMOTE_ADDR` directly for rate limiting.
+- `seed_demo` clients have no phone/email on purpose (never message real people).
 - i18n: after adding/changing any user-facing string run makemessages + translate +
   compilemessages (commands in README) — CI fails otherwise. Tests run in English by
   default (`tests/conftest.py`); Georgian behaviour lives in `tests/test_i18n.py`.
@@ -77,9 +88,9 @@ Notes:
 - Slot rule: the whole `duration + buffer` block must fit in free time; starts are on a
   15-min grid (salon-local) and in the future.
 - Booking views return HTMX fragments, or the full page for non-HTMX / history-restore
-  requests. Tailwind is the Play CDN for now (compiled build planned for M7).
+  requests.
 - Tests require PostgreSQL (not SQLite).
 
 ## Next step
-Start M7: ship — compiled Tailwind build (drop the Play CDN), production deployment
-(VPS + docker compose, HTTPS), demo data command, screenshots and a live demo link.
+Deploy to the VPS following `docs/deploy.md`, set the GitHub deploy secrets, then put the
+live URL into the README "Live demo" section and tick M7.
