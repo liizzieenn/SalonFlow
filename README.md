@@ -30,7 +30,7 @@ Clients book appointments online in Georgian or English, get automatic reminders
 | Backend | Python 3.12, Django 5, Django REST Framework |
 | Database | PostgreSQL 16 + pgvector |
 | Background jobs | Celery + Redis (reminders, embeddings) |
-| AI | RAG over salon services/FAQ, embeddings in pgvector, LLM API |
+| AI | RAG over salon services/FAQ, pgvector embeddings (Voyage AI), Claude API with tool use |
 | Frontend | Django templates + HTMX + Tailwind CSS |
 | Auth | django-allauth (email + Google) |
 | Infra | Docker, docker-compose, GitHub Actions CI, deployed on a VPS |
@@ -52,7 +52,7 @@ Client (browser) ──► Django (HTMX views + REST API)
 - [x] **M2 — Booking engine:** free-slot calculation, booking flow, conflict prevention, tests
 - [x] **M3 — Notifications:** Celery + Redis, email/SMS reminders
 - [x] **M4 — Dashboard:** owner calendar + analytics charts
-- [ ] **M5 — AI assistant:** pgvector embeddings, RAG chat over services/FAQ, slot suggestions
+- [x] **M5 — AI assistant:** pgvector embeddings, RAG chat over services/FAQ, slot suggestions
 - [ ] **M6 — i18n:** Georgian / English
 - [ ] **M7 — Ship:** CI, deployment, demo data, screenshots, live demo link
 
@@ -102,7 +102,7 @@ apps/
   bookings/          Booking, slot engine, booking service, HTMX booking flow
   notifications/     confirmation + reminder tasks, pluggable SMS backends
   dashboard/         owner/staff calendar, booking status, analytics
-  assistant/         RAG AI chat (M5)
+  assistant/         RAG chat: FAQ, pgvector index, pluggable LLM/embeddings
 tests/               pytest suite + factory_boy factories
 docker/              container entrypoint
 ```
@@ -154,6 +154,34 @@ docker/              container entrypoint
   a table view. All aggregation runs in PostgreSQL, grouped by the salon's local day
   and hour. Revenue counts completed visits plus past visits not flagged as no-show or
   cancelled.
+
+### AI assistant
+
+A chat widget on every salon's booking page answers questions in **Georgian or
+English** from that salon's own data and suggests real free times.
+
+- **Knowledge index** (`apps/assistant/knowledge.py`): each active service, FAQ entry
+  (new `FAQ` model, editable in the admin) and the salon's contact details and opening
+  hours become one embedded `KnowledgeChunk` in **pgvector** (HNSW index, cosine
+  distance). Signals queue a Celery task on commit whenever a source changes, and
+  unchanged text isn't re-embedded (content hash). `manage.py reindex_assistant` and an
+  admin action rebuild everything.
+- **RAG with citations** (`apps/assistant/chat.py`): retrieval is always filtered by
+  salon. The model answers only from the numbered entries and cites them as `[n]`;
+  citations pointing at anything that wasn't retrieved are dropped, and the widget lists
+  the cited sources. The reply language follows the question (Georgian script →
+  Georgian).
+- **Free-slot suggestions:** a `find_free_slots` tool, bound to the current salon, runs
+  the slot engine. The widget turns its results into booking buttons that open the
+  booking flow at the details step; URLs written by the model are never used.
+- **Pluggable providers** (`ASSISTANT_LLM_BACKEND`, `ASSISTANT_EMBEDDING_BACKEND`):
+  Claude (`claude-opus-5-5` through the official `anthropic` SDK's tool runner, low
+  effort, strict tool schema, server-side refusal fallbacks) and Voyage AI embeddings
+  for production. Deterministic **fake providers** need no keys and are the default for
+  development and tests.
+- **Rate limits** (Redis): per client IP (6/minute, 60/day) and per salon (daily cost
+  cap). If the cache is unreachable, requests are denied rather than allowed. Messages
+  are capped at 500 characters and the history sent to the model at 6 messages.
 
 ### Data integrity highlights
 

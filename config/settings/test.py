@@ -17,3 +17,6 @@ SMS_BACKEND = "apps.notifications.sms.backends.locmem.LocMemBackend"
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 MIDDLEWARE = [m for m in MIDDLEWARE if "whitenoise" not in m]  # noqa: F405
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+ASSISTANT_LLM_BACKEND = "apps.assistant.providers.fake.FakeLLM"
+ASSISTANT_EMBEDDING_BACKEND = "apps.assistant.providers.fake.FakeEmbeddings"

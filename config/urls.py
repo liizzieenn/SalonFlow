@@ -9,4 +9,5 @@ urlpatterns = [
     path("accounts/", include("django.contrib.auth.urls")),
     path("dashboard/", include("apps.dashboard.urls")),
     path("s/<slug:salon_slug>/book/", include("apps.bookings.urls")),
+    path("s/<slug:salon_slug>/assistant/", include("apps.assistant.urls")),
 ]

@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.utils.translation import gettext_lazy as _
 
 from .models import Break, Salon, Service, Staff, TimeOff, WorkingHours
@@ -19,6 +19,15 @@ class SalonAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     autocomplete_fields = ("owner",)
     inlines = (ServiceInline,)
+    actions = ("rebuild_assistant_index",)
+
+    @admin.action(description=_("Rebuild AI assistant index"))
+    def rebuild_assistant_index(self, request, queryset) -> None:
+        from apps.assistant.tasks import reindex_salon
+
+        for salon in queryset:
+            reindex_salon.delay(salon.pk)
+        self.message_user(request, _("Queued assistant re-indexing."), messages.INFO)
 
 
 @admin.register(Service)

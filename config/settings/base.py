@@ -159,6 +159,34 @@ TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", default="")
 TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
 TWILIO_FROM_NUMBER = env("TWILIO_FROM_NUMBER", default="")
 
+# Cache (rate limits) — Redis, shared by all web workers.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": env("CACHE_URL", default=CELERY_BROKER_URL),
+    }
+}
+
+# AI assistant
+ASSISTANT_LLM_BACKEND = env(
+    "ASSISTANT_LLM_BACKEND", default="apps.assistant.providers.fake.FakeLLM"
+)
+ASSISTANT_EMBEDDING_BACKEND = env(
+    "ASSISTANT_EMBEDDING_BACKEND",
+    default="apps.assistant.providers.fake.FakeEmbeddings",
+)
+ASSISTANT_LLM_MODEL = env("ASSISTANT_LLM_MODEL", default="claude-opus-5-5")
+ASSISTANT_EMBEDDING_MODEL = env("ASSISTANT_EMBEDDING_MODEL", default="voyage-3.5")
+VOYAGE_API_KEY = env("VOYAGE_API_KEY", default="")
+# ANTHROPIC_API_KEY is read by the anthropic SDK from the environment.
+ASSISTANT_TOP_K = 5
+#: Cosine distance cut-off for retrieved chunks (0 = identical, 2 = opposite).
+ASSISTANT_MAX_DISTANCE = env.float("ASSISTANT_MAX_DISTANCE", default=0.85)
+ASSISTANT_RATE_LIMITS = {
+    "client": {"minute": 6, "day": 60},
+    "salon": {"day": env.int("ASSISTANT_SALON_DAILY_LIMIT", default=1000)},
+}
+
 # Email
 EMAIL_HOST = env("EMAIL_HOST", default="")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)

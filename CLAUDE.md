@@ -50,7 +50,16 @@ access rules in `access.py` (owner: all; staff: own bookings, no analytics; othe
 week calendar (`calendar.py`), booking status changes (`change_status` in
 `apps/bookings/services.py`), analytics queries (`analytics.py`) + Chart.js charts.
 
+M5 done: `apps/assistant` — `FAQ` + `KnowledgeChunk` (pgvector, HNSW) models,
+indexing (`knowledge.py`, Celery `tasks.py`, `signals.py`), RAG chat (`chat.py`) with
+salon-bound `find_free_slots` tool, providers in `providers/` (fake / anthropic /
+voyage), rate limiting (`ratelimit.py`), HTMX widget (`{% assistant_widget salon %}`).
+
 Notes:
+- Assistant: retrieval and the slot tool are always salon-scoped; never trust model
+  output for URLs or ids from other salons. Dev/tests use fake providers (no keys).
+- `EMBEDDING_DIMENSIONS` (1024) is baked into the migration; changing the embedding
+  model's size needs a migration + `manage.py reindex_assistant`.
 - Notifications are idempotent per (booking, kind, channel) — unique constraint + row lock.
   Reminder lead times live in `BOOKING_REMINDER_HOURS`.
 - Double-booking is blocked at DB level by `booking_no_staff_overlap` (ExclusionConstraint,
@@ -62,5 +71,5 @@ Notes:
 - Tests require PostgreSQL (not SQLite).
 
 ## Next step
-Start M5: AI assistant — pgvector embeddings of services/FAQ, RAG chat that answers
-questions and suggests free slots (use the slot engine).
+Start M6: i18n — Georgian/English language switcher (i18n_patterns or session),
+`makemessages`/`compilemessages`, Georgian translations for all UI, emails and SMS.

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n assistant %}
 {% block title %}{% blocktrans with name=salon.name %}Book at {{ name }}{% endblocktrans %}{% endblock %}
 {% block content %}
 <header class="mb-6">
@@ -11,4 +11,5 @@
          hx-boost="true" hx-target="#step" hx-swap="innerHTML show:window:top">
   {% include step_template %}
 </section>
+{% assistant_widget salon %}
 {% endblock %}
