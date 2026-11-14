@@ -53,7 +53,7 @@ Client (browser) ──► Django (HTMX views + REST API)
 - [x] **M3 — Notifications:** Celery + Redis, email/SMS reminders
 - [x] **M4 — Dashboard:** owner calendar + analytics charts
 - [x] **M5 — AI assistant:** pgvector embeddings, RAG chat over services/FAQ, slot suggestions
-- [ ] **M6 — i18n:** Georgian / English
+- [x] **M6 — i18n:** Georgian / English
 - [ ] **M7 — Ship:** CI, deployment, demo data, screenshots, live demo link
 
 ## Getting started
@@ -68,7 +68,7 @@ docker compose up --build
 docker compose exec web python manage.py createsuperuser
 ```
 
-App: http://localhost:8000 · Booking page: http://localhost:8000/s/&lt;salon-slug&gt;/book/ · Dashboard: http://localhost:8000/dashboard/ · Admin: http://localhost:8000/admin/ · Health: http://localhost:8000/health/
+App: http://localhost:8000 · Booking page: http://localhost:8000/s/&lt;salon-slug&gt;/book/ (English: `/en/s/…`) · Dashboard: http://localhost:8000/dashboard/ · Admin: http://localhost:8000/admin/ · Health: http://localhost:8000/health/
 
 ### Without Docker
 
@@ -182,6 +182,32 @@ English** from that salon's own data and suggests real free times.
 - **Rate limits** (Redis): per client IP (6/minute, 60/day) and per salon (daily cost
   cap). If the cache is unreachable, requests are denied rather than allowed. Messages
   are capped at 500 characters and the history sent to the model at 6 messages.
+
+### Georgian & English
+
+- **Georgian is the default**, served without a URL prefix; English lives under `/en/`
+  (`i18n_patterns`, `prefix_default_language=False`). The URL alone decides the
+  language, so a link always opens in the language it was shared in.
+- **Language switcher** in every header. It wraps Django's `set_language` so `next` is
+  resolved in its own language, which makes switching from `/en/…` back to Georgian
+  work whatever the cookie says.
+- **Full Georgian catalogue** (`locale/ka/LC_MESSAGES/django.po`, 215 strings: booking
+  flow, dashboard, analytics, assistant, emails, SMS, admin labels). Dates, weekdays
+  and chart labels use Django's Georgian locale data.
+- **Clients' language:** a client's `preferred_language` is saved from the language they
+  book in, and every confirmation and reminder (email + SMS) is rendered in that
+  language, whatever language the Celery worker is running in.
+- **CI translation gate** (`tests/test_i18n.py`) fails on any untranslated, fuzzy or
+  obsolete entry, on mismatched `%(name)s` placeholders, on a stale `.mo`, and on
+  translatable strings in the code that were never extracted into the `.po`.
+
+Updating translations:
+
+```bash
+python manage.py makemessages -l ka -e html,txt,py --ignore=.venv --ignore=staticfiles --ignore=tests --add-location=file --no-obsolete
+# translate the new entries in locale/ka/LC_MESSAGES/django.po, then:
+python manage.py compilemessages -l ka --ignore=.venv
+```
 
 ### Data integrity highlights
 
