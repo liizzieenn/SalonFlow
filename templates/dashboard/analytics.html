@@ -103,7 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const v = (name) => css.getPropertyValue(name).trim();
   const lang = document.documentElement.lang || "en";
   const fmt = new Intl.NumberFormat(lang, { maximumFractionDigits: 0 });
-  const day = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short" });
 
   Chart.defaults.font.family = "ui-sans-serif, system-ui, sans-serif";
   Chart.defaults.color = v("--text-secondary");
@@ -142,11 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (revenue) {
     const opts = base(false, (c) => `${fmt.format(c.parsed.y)} ₾`);
     opts.scales = {
-      x: { ...axis({ maxRotation: 0, autoSkip: true, maxTicksLimit: 10,
-            callback: (i) => day.format(new Date(data.revenue.labels[i])) }), grid: { display: false } },
+      x: { ...axis({ maxRotation: 0, autoSkip: true, maxTicksLimit: 10 }), grid: { display: false } },
       y: { ...axis({ callback: (val) => fmt.format(val) }), beginAtZero: true },
     };
-    opts.plugins.tooltip.callbacks.title = (items) => day.format(new Date(data.revenue.labels[items[0].dataIndex]));
     new Chart(revenue, { type: "bar", data: { labels: data.revenue.labels, datasets: [{ data: data.revenue.values, ...bar() }] }, options: opts });
   }
 
