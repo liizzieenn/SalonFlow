@@ -36,11 +36,19 @@ M1 done: project scaffold, settings split (base/dev/test/prod), custom User, dom
 (web, celery, pgvector db, redis), pytest suite, GitHub Actions CI (ruff, black, migrations
 check, tests on pgvector/pg16).
 
+M2 done: slot engine (`apps/bookings/slots.py`), booking service with atomic +
+`select_for_update` (`apps/bookings/services.py`), public HTMX booking flow at
+`/s/<salon-slug>/book/` (`apps/bookings/views.py`, `templates/bookings/`).
+
 Notes:
 - Double-booking is blocked at DB level by `booking_no_staff_overlap` (ExclusionConstraint,
-  btree_gist). `Booking.end_at` excludes buffer time — the slot engine must add buffer.
+  btree_gist). `Booking.end_at` excludes buffer time — the slot engine adds it.
+- Slot rule: the whole `duration + buffer` block must fit in free time; starts are on a
+  15-min grid (salon-local) and in the future.
+- Booking views return HTMX fragments, or the full page for non-HTMX / history-restore
+  requests. Tailwind is the Play CDN for now (compiled build planned for M7).
 - Tests require PostgreSQL (not SQLite).
 
 ## Next step
-Start M2: slot engine (working hours − breaks − time off − bookings, respecting duration +
-buffer), booking service with `transaction.atomic` + `select_for_update`, booking flow views.
+Start M3: Celery + Redis reminder tasks (email/SMS 24h and 2h before the visit), booking
+confirmation email.

@@ -49,7 +49,7 @@ Client (browser) ──► Django (HTMX views + REST API)
 ## Roadmap
 
 - [x] **M1 — Core:** project setup, Docker, models (Salon, Staff, Service, Booking, Client), admin
-- [ ] **M2 — Booking engine:** free-slot calculation, booking flow, conflict prevention, tests
+- [x] **M2 — Booking engine:** free-slot calculation, booking flow, conflict prevention, tests
 - [ ] **M3 — Notifications:** Celery + Redis, email/SMS reminders
 - [ ] **M4 — Dashboard:** owner calendar + analytics charts
 - [ ] **M5 — AI assistant:** pgvector embeddings, RAG chat over services/FAQ, slot suggestions
@@ -68,7 +68,7 @@ docker compose up --build
 docker compose exec web python manage.py createsuperuser
 ```
 
-App: http://localhost:8000 · Admin: http://localhost:8000/admin/ · Health: http://localhost:8000/health/
+App: http://localhost:8000 · Booking page: http://localhost:8000/s/&lt;salon-slug&gt;/book/ · Admin: http://localhost:8000/admin/ · Health: http://localhost:8000/health/
 
 ### Without Docker
 
@@ -99,13 +99,27 @@ apps/
   accounts/          custom User model
   salons/            Salon, Service, Staff, WorkingHours, Break, TimeOff
   clients/           per-salon Client profiles
-  bookings/          Booking + double-booking protection
+  bookings/          Booking, slot engine, booking service, HTMX booking flow
   notifications/     Celery reminder tasks (M3)
   dashboard/         owner analytics (M4)
   assistant/         RAG AI chat (M5)
 tests/               pytest suite + factory_boy factories
 docker/              container entrypoint
 ```
+
+### Booking engine
+
+- **Slot engine** (`apps/bookings/slots.py`): free time = working hours − breaks −
+  time off − existing bookings (each extended by its service's buffer). A start time is
+  offered when the whole `duration + buffer` block fits, it lies on the salon's 15-minute
+  grid and it is in the future. "Any specialist" merges every staff member's slots.
+- **Booking service** (`apps/bookings/services.py`): `create_booking` runs in
+  `transaction.atomic`, locks the staff row with `select_for_update()` and re-checks
+  availability before inserting, so concurrent requests for the same staff member are
+  serialised. A threaded test fires 8 simultaneous requests at one slot: exactly one wins.
+- **Booking flow** (`apps/bookings/views.py`): service → specialist → day → time →
+  details → confirmation. Every step is an HTMX fragment (`hx-boost`); without
+  JavaScript or on refresh the same URL renders the full page.
 
 ### Data integrity highlights
 
