@@ -12,6 +12,7 @@ import hashlib
 from dataclasses import dataclass
 
 from django.db.models import Max, Min
+from django.utils import translation
 from pgvector.django import CosineDistance
 
 from apps.salons.models import Salon, Service, Weekday, WorkingHours
@@ -87,7 +88,16 @@ def _salon_document(salon: Salon) -> Document | None:
 
 
 def build_document(source: str, source_id: int) -> Document | None:
-    """The text to embed for a source, or ``None`` if it should not be indexed."""
+    """The text to embed for a source, or ``None`` if it should not be indexed.
+
+    Always built in English (labels such as weekday names are translatable), so
+    the text and its hash don't depend on the language active when it runs.
+    """
+    with translation.override("en"):
+        return _build_document(source, source_id)
+
+
+def _build_document(source: str, source_id: int) -> Document | None:
     if source == Source.SERVICE:
         obj = Service.objects.filter(pk=source_id).select_related("salon").first()
         return _service_document(obj) if obj and obj.salon.is_active else None
