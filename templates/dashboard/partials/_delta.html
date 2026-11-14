@@ -1,0 +1,1 @@
+{% load i18n %}<p class="mt-1 text-xs text-stone-500">{% if value is None %}{% trans "no data for the previous period" %}{% elif value > 0 %}▲ +{{ value|floatformat:1 }}% {% trans "vs previous period" %}{% elif value < 0 %}▼ {{ value|floatformat:1|cut:"-" }}% {% trans "vs previous period" %}{% else %}{% trans "same as previous period" %}{% endif %}</p>

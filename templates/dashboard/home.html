@@ -1,0 +1,14 @@
+{% extends "dashboard/base.html" %}
+{% load i18n %}
+{% block content %}
+<h1 class="mb-4 text-xl font-semibold">{% trans "Your salons" %}</h1>
+{% if salons %}
+<ul class="divide-y divide-stone-100 rounded-2xl bg-white shadow-sm ring-1 ring-stone-200">
+  {% for s in salons %}
+  <li><a class="block px-4 py-3 hover:text-rose-700" href="{% url 'dashboard:calendar' s.slug %}">{{ s.name }}</a></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-stone-600">{% trans "Your account isn't linked to a salon yet. Ask the salon owner to add you as a staff member." %}</p>
+{% endif %}
+{% endblock %}
