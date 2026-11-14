@@ -50,7 +50,7 @@ Client (browser) ──► Django (HTMX views + REST API)
 
 - [x] **M1 — Core:** project setup, Docker, models (Salon, Staff, Service, Booking, Client), admin
 - [x] **M2 — Booking engine:** free-slot calculation, booking flow, conflict prevention, tests
-- [ ] **M3 — Notifications:** Celery + Redis, email/SMS reminders
+- [x] **M3 — Notifications:** Celery + Redis, email/SMS reminders
 - [ ] **M4 — Dashboard:** owner calendar + analytics charts
 - [ ] **M5 — AI assistant:** pgvector embeddings, RAG chat over services/FAQ, slot suggestions
 - [ ] **M6 — i18n:** Georgian / English
@@ -100,7 +100,7 @@ apps/
   salons/            Salon, Service, Staff, WorkingHours, Break, TimeOff
   clients/           per-salon Client profiles
   bookings/          Booking, slot engine, booking service, HTMX booking flow
-  notifications/     Celery reminder tasks (M3)
+  notifications/     confirmation + reminder tasks, pluggable SMS backends
   dashboard/         owner analytics (M4)
   assistant/         RAG AI chat (M5)
 tests/               pytest suite + factory_boy factories
@@ -120,6 +120,23 @@ docker/              container entrypoint
 - **Booking flow** (`apps/bookings/views.py`): service → specialist → day → time →
   details → confirmation. Every step is an HTMX fragment (`hx-boost`); without
   JavaScript or on refresh the same URL renders the full page.
+
+### Notifications
+
+- **Confirmation** email + SMS is queued with `transaction.on_commit` when a booking is
+  created (never for a rolled-back booking; a broker outage doesn't fail the request).
+- **Reminders 24h and 2h before** the visit: Celery beat runs
+  `dispatch_due_reminders` every 5 minutes and queues every reminder whose send time has
+  come. A reminder is skipped for cancelled bookings and for bookings made after its send
+  time (the confirmation already covered them).
+- **Exactly-once delivery:** every (booking, kind, channel) gets a `Notification` row
+  (unique constraint) that is row-locked while sending. Retries (exponential backoff) and
+  duplicate tasks never send twice, and a retry only re-sends the failed channel.
+- **Pluggable SMS** (`apps/notifications/sms/`), configured like Django's email backends
+  with `SMS_BACKEND`: `ConsoleBackend` (dev, prints to the worker log), `LocMemBackend`
+  (tests) and `TwilioBackend` (production). A new provider only needs to implement
+  `send_messages()`.
+- Messages are rendered in the client's preferred language and the salon's time zone.
 
 ### Data integrity highlights
 

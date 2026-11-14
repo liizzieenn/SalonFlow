@@ -21,6 +21,8 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.clients.models import Client
+from apps.notifications.models import Notification
+from apps.notifications.tasks import send_booking_notification
 from apps.salons.models import Salon, Service, Staff
 
 from .models import Booking
@@ -93,6 +95,15 @@ def _candidate_staff(service: Service, staff: Staff | None) -> list[int]:
     )
 
 
+def _confirmation_sender(booking_id: int):
+    """Named on-commit callback (Django logs robust failures by ``__qualname__``)."""
+
+    def send_confirmation() -> None:
+        send_booking_notification.delay(booking_id, Notification.Kind.CONFIRMATION)
+
+    return send_confirmation
+
+
 @transaction.atomic
 def create_booking(
     *,
@@ -145,6 +156,9 @@ def create_booking(
         if "booking_no_staff_overlap" in str(exc):
             raise SlotUnavailableError from exc
         raise
+    # Only after commit: the worker must see the row, and a rolled-back booking must
+    # not be confirmed. ``robust`` keeps a broker outage from failing the request.
+    transaction.on_commit(_confirmation_sender(booking.pk), robust=True)
     return booking
 
 

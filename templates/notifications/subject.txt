@@ -1,0 +1,1 @@
+{% load i18n %}{% if kind == Kind.CONFIRMATION %}{% blocktrans with salon=salon.name %}Your booking at {{ salon }} is confirmed{% endblocktrans %}{% else %}{% blocktrans with salon=salon.name %}Reminder: your appointment at {{ salon }}{% endblocktrans %}{% endif %}

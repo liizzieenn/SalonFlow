@@ -40,7 +40,14 @@ M2 done: slot engine (`apps/bookings/slots.py`), booking service with atomic +
 `select_for_update` (`apps/bookings/services.py`), public HTMX booking flow at
 `/s/<salon-slug>/book/` (`apps/bookings/views.py`, `templates/bookings/`).
 
+M3 done: `apps/notifications` — `Notification` delivery log, Celery tasks
+`send_booking_notification` / `dispatch_due_reminders` (beat, every 5 min), pluggable SMS
+backends (`SMS_BACKEND`: console / locmem / twilio), email + SMS templates in
+`templates/notifications/`. Confirmation is queued from `create_booking` via on_commit.
+
 Notes:
+- Notifications are idempotent per (booking, kind, channel) — unique constraint + row lock.
+  Reminder lead times live in `BOOKING_REMINDER_HOURS`.
 - Double-booking is blocked at DB level by `booking_no_staff_overlap` (ExclusionConstraint,
   btree_gist). `Booking.end_at` excludes buffer time — the slot engine adds it.
 - Slot rule: the whole `duration + buffer` block must fit in free time; starts are on a
@@ -50,5 +57,5 @@ Notes:
 - Tests require PostgreSQL (not SQLite).
 
 ## Next step
-Start M3: Celery + Redis reminder tasks (email/SMS 24h and 2h before the visit), booking
-confirmation email.
+Start M4: owner dashboard — calendar view of bookings and analytics (revenue, busiest
+hours, top services, no-show rate).
