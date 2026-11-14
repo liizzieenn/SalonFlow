@@ -1,0 +1,11 @@
+{% load i18n %}
+<div class="text-center">
+  <p class="text-4xl">✓</p>
+  <h2 class="mt-2 text-lg font-semibold">{% trans "You're booked!" %}</h2>
+  <p class="mt-2 text-stone-600">
+    {{ booking.service.name }} · {{ booking.staff.full_name }}<br>
+    {{ booking.start_at|date:"l, j F" }} {{ booking.start_at|time:"H:i" }}
+  </p>
+  <p class="mt-4 text-sm text-stone-500">{% blocktrans with phone=booking.client.phone %}We'll send a reminder to {{ phone }} before your visit.{% endblocktrans %}</p>
+  <a href="{% url 'bookings:services' salon.slug %}" class="mt-6 inline-block text-sm font-medium text-rose-700 hover:underline">{% trans "Book another appointment" %}</a>
+</div>

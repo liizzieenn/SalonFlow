@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% blocktrans with name=salon.name %}Book at {{ name }}{% endblocktrans %}{% endblock %}
+{% block content %}
+<header class="mb-6">
+  <a href="{% url 'bookings:services' salon.slug %}" class="text-2xl font-semibold tracking-tight">{{ salon.name }}</a>
+  {% if salon.address %}<p class="text-sm text-stone-500">{{ salon.address }}{% if salon.city %}, {{ salon.city }}{% endif %}</p>{% endif %}
+</header>
+<section id="step"
+         class="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-stone-200"
+         hx-boost="true" hx-target="#step" hx-swap="innerHTML show:window:top">
+  {% include step_template %}
+</section>
+{% endblock %}

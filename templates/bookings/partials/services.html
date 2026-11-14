@@ -1,0 +1,18 @@
+{% load i18n %}
+<h2 class="mb-4 text-lg font-semibold">{% trans "Choose a service" %}</h2>
+<ul class="divide-y divide-stone-100">
+  {% for service in services %}
+  <li>
+    <a href="{% url 'bookings:staff' salon.slug %}?service={{ service.pk }}"
+       class="flex items-center justify-between gap-4 py-3 hover:text-rose-700">
+      <span>
+        <span class="font-medium">{{ service.name }}</span>
+        <span class="block text-sm text-stone-500">{% blocktrans with minutes=service.duration_minutes %}{{ minutes }} min{% endblocktrans %}</span>
+      </span>
+      <span class="whitespace-nowrap font-medium">{{ service.price }} ₾</span>
+    </a>
+  </li>
+  {% empty %}
+  <li class="py-3 text-stone-500">{% trans "No services available for online booking yet." %}</li>
+  {% endfor %}
+</ul>

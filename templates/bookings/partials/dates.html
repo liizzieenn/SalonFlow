@@ -1,0 +1,16 @@
+{% load i18n %}
+<a href="{% url 'bookings:staff' salon.slug %}?service={{ service.pk }}" class="mb-4 inline-flex items-center text-sm text-stone-500 hover:text-stone-800">← {% trans "Back" %}</a>
+<h2 class="mb-1 text-lg font-semibold">{% trans "Choose a day" %}</h2>
+<p class="mb-4 text-sm text-stone-500">{{ service.name }} · {% if staff %}{{ staff.full_name }}{% else %}{% trans "Any specialist" %}{% endif %}</p>
+<ul class="grid grid-cols-4 gap-2 sm:grid-cols-7">
+  {% for day in dates %}
+  <li>
+    <a href="{% url 'bookings:slots' salon.slug %}?service={{ service.pk }}&staff={{ staff_value }}&date={{ day|date:'Y-m-d' }}"
+       class="block rounded-xl border border-stone-200 py-2 text-center hover:border-rose-400">
+      <span class="block text-xs uppercase text-stone-500">{{ day|date:"D" }}</span>
+      <span class="block text-lg font-semibold">{{ day|date:"j" }}</span>
+      <span class="block text-xs text-stone-500">{{ day|date:"M" }}</span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
