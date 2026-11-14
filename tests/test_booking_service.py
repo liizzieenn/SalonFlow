@@ -9,8 +9,11 @@ from apps.bookings.models import Booking
 from apps.bookings.services import (
     ClientDetails,
     InvalidSelectionError,
+    InvalidStatusChangeError,
     SlotUnavailableError,
+    allowed_status_changes,
     cancel_booking,
+    change_status,
     create_booking,
     get_or_create_client,
 )
@@ -208,3 +211,42 @@ def test_db_constraint_is_last_line_of_defence(service, staff, monkeypatch):
     with pytest.raises(SlotUnavailableError):
         book(service, staff, details=ClientDetails("B", "+995555000002"))
     assert Booking.objects.count() == 1
+
+
+@pytest.mark.django_db
+class TestChangeStatus:
+    @pytest.fixture
+    def booking(self, service, staff):
+        return book(service, staff)  # confirmed, starts at TEN
+
+    def test_future_booking_can_only_be_cancelled(self, booking):
+        assert allowed_status_changes(booking, now=NOW) == ["cancelled"]
+
+    def test_started_booking_can_be_completed_or_no_show(self, booking):
+        after = TEN.replace(hour=11)
+        assert allowed_status_changes(booking, now=after) == [
+            "completed",
+            "no_show",
+            "cancelled",
+        ]
+        change_status(booking, "no_show", now=after)
+        booking.refresh_from_db()
+        assert booking.status == "no_show"
+        assert allowed_status_changes(booking, now=after) == ["completed"]
+
+    def test_pending_can_be_confirmed(self, booking):
+        booking.status = Booking.Status.PENDING
+        assert "confirmed" in allowed_status_changes(booking, now=NOW)
+
+    def test_cancelled_is_final(self, booking):
+        change_status(booking, "cancelled", now=NOW)
+        assert allowed_status_changes(booking, now=NOW) == []
+        with pytest.raises(InvalidStatusChangeError):
+            change_status(booking, "confirmed", now=NOW)
+
+    @pytest.mark.parametrize("status", ["completed", "no_show", "bogus", ""])
+    def test_invalid_change_rejected(self, booking, status):
+        with pytest.raises(InvalidStatusChangeError):
+            change_status(booking, status, now=NOW)
+        booking.refresh_from_db()
+        assert booking.status == "confirmed"

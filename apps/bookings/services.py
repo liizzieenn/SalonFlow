@@ -46,6 +46,10 @@ class InvalidSelectionError(BookingError):
     message = _("The selected service or staff member is not available.")
 
 
+class InvalidStatusChangeError(BookingError):
+    message = _("This status change is not allowed.")
+
+
 @dataclass(frozen=True)
 class ClientDetails:
     """Contact details entered in the booking form."""
@@ -167,4 +171,42 @@ def cancel_booking(booking: Booking) -> Booking:
     if booking.status != Booking.Status.CANCELLED:
         booking.status = Booking.Status.CANCELLED
         booking.save(update_fields=["status", "updated_at"])
+    return booking
+
+
+S = Booking.Status
+
+#: Allowed manual status changes. Cancelled is final: reopening could overlap a
+#: booking made in the meantime. Completed / no-show only make sense once started.
+STATUS_TRANSITIONS: dict[str, set[str]] = {
+    S.PENDING: {S.CONFIRMED, S.CANCELLED, S.COMPLETED, S.NO_SHOW},
+    S.CONFIRMED: {S.CANCELLED, S.COMPLETED, S.NO_SHOW},
+    S.COMPLETED: {S.NO_SHOW},
+    S.NO_SHOW: {S.COMPLETED},
+    S.CANCELLED: set(),
+}
+REQUIRES_STARTED = {S.COMPLETED, S.NO_SHOW}
+#: Order in which actions are offered (the destructive one last).
+ACTION_ORDER = [S.CONFIRMED, S.COMPLETED, S.NO_SHOW, S.CANCELLED]
+
+
+def allowed_status_changes(booking: Booking, now: datetime | None = None) -> list[str]:
+    """Statuses ``booking`` may be moved to right now, in display order."""
+    now = now or timezone.now()
+    allowed = STATUS_TRANSITIONS[booking.status]
+    if booking.start_at > now:
+        allowed = allowed - REQUIRES_STARTED
+    return [status for status in ACTION_ORDER if status in allowed]
+
+
+def change_status(
+    booking: Booking, new_status: str, *, now: datetime | None = None
+) -> Booking:
+    """Move a booking to ``new_status`` (from the staff dashboard)."""
+    if new_status not in allowed_status_changes(booking, now):
+        raise InvalidStatusChangeError
+    if new_status == S.CANCELLED:
+        return cancel_booking(booking)
+    booking.status = new_status
+    booking.save(update_fields=["status", "updated_at"])
     return booking
