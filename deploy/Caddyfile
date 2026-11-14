@@ -1,0 +1,25 @@
+# Caddy obtains and renews the TLS certificate for {$DOMAIN} automatically
+# (Let's Encrypt / ZeroSSL). Ports 80 and 443 must be reachable.
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Static files are served (hashed, compressed, long-cached) by whitenoise.
+	reverse_proxy web:8000 {
+		health_uri /health/
+		health_interval 30s
+		# Django's ALLOWED_HOSTS only accepts the public name, not "web:8000".
+		health_headers {
+			Host {$DOMAIN}
+		}
+	}
+
+	header -Server
+	log {
+		output stdout
+		format console
+	}
+}

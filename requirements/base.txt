@@ -7,3 +7,4 @@ celery>=5.5,<6.0
 redis>=5.2,<9.0
 whitenoise>=6.9,<7.0
 anthropic>=2.8,<3.0
+packaging>=24.0  # needed by kombu's Redis transport (Celery broker)

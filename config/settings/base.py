@@ -159,6 +159,10 @@ TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", default="")
 TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
 TWILIO_FROM_NUMBER = env("TWILIO_FROM_NUMBER", default="")
 
+#: Reverse proxies in front of Django that append to X-Forwarded-For (see
+#: apps.core.net.client_ip). 0 locally; production sets 1 (Caddy).
+TRUSTED_PROXY_HOPS = env.int("TRUSTED_PROXY_HOPS", default=0)
+
 # Cache (rate limits) — Redis, shared by all web workers.
 CACHES = {
     "default": {
