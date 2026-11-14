@@ -13,6 +13,7 @@ EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 STORAGES["staticfiles"] = {  # noqa: F405
     "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
 }
+SMS_BACKEND = "apps.notifications.sms.backends.locmem.LocMemBackend"
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 MIDDLEWARE = [m for m in MIDDLEWARE if "whitenoise" not in m]  # noqa: F405

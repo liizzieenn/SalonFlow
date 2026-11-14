@@ -137,6 +137,24 @@ CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 5 * 60
+CELERY_TASK_ACKS_LATE = True
+CELERY_BEAT_SCHEDULE = {
+    "dispatch-due-reminders": {
+        "task": "notifications.dispatch_due_reminders",
+        "schedule": env.int("REMINDER_DISPATCH_INTERVAL_SECONDS", default=300),
+    },
+}
+
+# Notifications
+#: Reminder kind -> hours before the appointment it is sent.
+BOOKING_REMINDER_HOURS = {"reminder_24h": 24, "reminder_2h": 2}
+SMS_BACKEND = env(
+    "SMS_BACKEND", default="apps.notifications.sms.backends.console.ConsoleBackend"
+)
+SMS_SENDER = env("SMS_SENDER", default="SalonFlow")
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", default="")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", default="")
+TWILIO_FROM_NUMBER = env("TWILIO_FROM_NUMBER", default="")
 
 # Email
 EMAIL_HOST = env("EMAIL_HOST", default="")
