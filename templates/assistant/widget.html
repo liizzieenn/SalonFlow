@@ -1,0 +1,40 @@
+{% load i18n %}
+<details id="assistant" class="group fixed bottom-4 right-4 z-50 w-[calc(100vw-2rem)] max-w-sm" {% if messages_list %}open{% endif %}>
+  <summary class="ml-auto flex w-max cursor-pointer list-none items-center gap-2 rounded-full bg-stone-900 px-4 py-3 text-sm font-medium text-white shadow-lg hover:bg-stone-800 group-open:hidden">
+    <span aria-hidden="true">💬</span> {% trans "Ask our assistant" %}
+  </summary>
+  <section class="flex max-h-[70vh] flex-col overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-stone-200" aria-label="{% trans 'Salon assistant' %}">
+    <header class="flex items-center gap-2 border-b border-stone-200 px-4 py-3">
+      <div class="flex-1">
+        <p class="font-semibold">{% trans "Salon assistant" %}</p>
+        <p class="text-xs text-stone-500">{% trans "Answers from this salon's information. Ask in Georgian or English." %}</p>
+      </div>
+      <form method="post" action="{% url 'assistant:reset' salon.slug %}" hx-post="{% url 'assistant:reset' salon.slug %}" hx-target="#chat-log" hx-swap="innerHTML">
+        {% csrf_token %}<button class="text-xs text-stone-500 hover:text-stone-800">{% trans "Clear" %}</button>
+      </form>
+      <button type="button" class="text-stone-400 hover:text-stone-700" aria-label="{% trans 'Close' %}" onclick="this.closest('details').open = false">✕</button>
+    </header>
+    {# htmx fires beforeSwap on the swap target, so error statuses are opted in here. #}
+    <div id="chat-log" class="flex-1 space-y-3 overflow-y-auto px-4 py-3 text-sm" aria-live="polite"
+         hx-on::before-swap="if ([400, 429, 503].includes(event.detail.xhr.status)) { event.detail.shouldSwap = true; event.detail.isError = false; }">
+      {% if messages_list %}{% include "assistant/partials/messages.html" %}{% else %}
+      <p class="text-stone-500">{% trans "Hi! Ask me about services, prices, opening hours — or when there's a free time." %}</p>
+      {% endif %}
+    </div>
+    <form method="post" action="{% url 'assistant:chat' salon.slug %}"
+          hx-post="{% url 'assistant:chat' salon.slug %}" hx-target="#chat-log" hx-swap="beforeend scroll:#chat-log:bottom"
+          hx-indicator="#assistant-typing" hx-disabled-elt="find button"
+          hx-on::after-request="if (event.detail.successful || event.detail.xhr.status === 429) this.reset()"
+          class="border-t border-stone-200 p-3">
+      {% csrf_token %}
+      <p id="assistant-typing" class="htmx-indicator mb-2 text-xs text-stone-500">{% trans "Thinking…" %}</p>
+      <div class="flex gap-2">
+        <label for="assistant-input" class="sr-only">{% trans "Your question" %}</label>
+        <input id="assistant-input" name="message" maxlength="500" required autocomplete="off"
+               placeholder="{% trans 'e.g. How much is a manicure?' %}"
+               class="min-w-0 flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-400">
+        <button class="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50">{% trans "Send" %}</button>
+      </div>
+    </form>
+  </section>
+</details>
