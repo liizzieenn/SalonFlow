@@ -2,6 +2,9 @@
 # (Let's Encrypt / ZeroSSL). Ports 80 and 443 must be reachable.
 {
 	email {$ACME_EMAIL}
+	# Pin the admin API to IPv4 loopback: the container health check calls it, and
+	# "localhost" can resolve to ::1 where nothing listens (e.g. on GitHub runners).
+	admin 127.0.0.1:2019
 }
 
 {$DOMAIN} {

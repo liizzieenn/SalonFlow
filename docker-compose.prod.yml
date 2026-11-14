@@ -72,7 +72,7 @@ services:
       - caddy_config:/config
     healthcheck:
       # Admin API is only bound inside the container; a crash loop fails `--wait`.
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:2019/config/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
       interval: 10s
       timeout: 3s
       retries: 5
