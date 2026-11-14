@@ -1,0 +1,12 @@
+{% extends "dashboard/base.html" %}
+{% load i18n %}
+{% block content %}
+<div class="flex flex-col gap-4 lg:flex-row">
+  <div class="min-w-0 flex-1">
+    {% include "dashboard/partials/calendar_grid.html" %}
+  </div>
+  <aside id="booking-panel" class="lg:w-80 lg:shrink-0" aria-live="polite">
+    <div class="rounded-2xl border border-dashed border-stone-300 p-4 text-sm text-stone-500">{% trans "Select a booking to see details." %}</div>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% load i18n l10n %}
+{% url 'dashboard:calendar' salon.slug as calendar_url %}
+<section id="calendar"
+         hx-get="{{ request.get_full_path }}" hx-trigger="bookingChanged from:body"
+         hx-target="this" hx-swap="outerHTML">
+  <div class="mb-3 flex flex-wrap items-center gap-2">
+    {% with staff_q=selected_staff|default_if_none:"" %}
+    <div class="flex items-center gap-1" hx-target="#calendar" hx-swap="outerHTML" hx-push-url="true">
+      <a class="rounded-lg border border-stone-200 bg-white px-2 py-1 hover:border-stone-400" aria-label="{% trans 'Previous week' %}"
+         href="{{ calendar_url }}?week={{ week.prev_week|date:'Y-m-d' }}&staff={{ staff_q }}" hx-get="{{ calendar_url }}?week={{ week.prev_week|date:'Y-m-d' }}&staff={{ staff_q }}">←</a>
+      <a class="rounded-lg border border-stone-200 bg-white px-3 py-1 text-sm hover:border-stone-400"
+         href="{{ calendar_url }}?staff={{ staff_q }}" hx-get="{{ calendar_url }}?staff={{ staff_q }}">{% trans "Today" %}</a>
+      <a class="rounded-lg border border-stone-200 bg-white px-2 py-1 hover:border-stone-400" aria-label="{% trans 'Next week' %}"
+         href="{{ calendar_url }}?week={{ week.next_week|date:'Y-m-d' }}&staff={{ staff_q }}" hx-get="{{ calendar_url }}?week={{ week.next_week|date:'Y-m-d' }}&staff={{ staff_q }}">→</a>
+    </div>
+    <h1 class="text-lg font-semibold">{{ week.week_start|date:"j M" }} – {{ week.days.6.day|date:"j M Y" }}</h1>
+    {% if staff_members %}
+    <form method="get" action="{{ calendar_url }}" class="ml-auto">
+      <input type="hidden" name="week" value="{{ week.week_start|date:'Y-m-d' }}">
+      <label class="sr-only" for="staff-filter">{% trans "Specialist" %}</label>
+      <select id="staff-filter" name="staff" class="rounded-lg border border-stone-300 bg-white px-2 py-1 text-sm"
+              hx-get="{{ calendar_url }}" hx-include="closest form" hx-trigger="change" hx-target="#calendar" hx-swap="outerHTML" hx-push-url="true">
+        <option value="">{% trans "All specialists" %}</option>
+        {% for member in staff_members %}<option value="{{ member.pk }}" {% if member.pk == selected_staff %}selected{% endif %}>{{ member.full_name }}</option>{% endfor %}
+      </select>
+      <noscript><button class="text-sm underline">{% trans "Show" %}</button></noscript>
+    </form>
+    {% endif %}
+    {% endwith %}
+  </div>
+
+  {% if week.lane_staff|length > 1 %}
+  <p class="mb-2 text-xs text-stone-500">{% trans "Columns in each day, left to right:" %} {% for member in week.lane_staff %}<span class="font-medium text-stone-700">{{ member.full_name }}</span>{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+  {% endif %}
+  <div class="overflow-x-auto rounded-2xl bg-white shadow-sm ring-1 ring-stone-200">
+    <div class="grid min-w-[760px]" style="grid-template-columns: 3.5rem repeat(7, minmax(0, 1fr));">
+      <div class="border-b border-stone-200"></div>
+      {% for d in week.days %}
+      <div class="border-b border-l border-stone-200 px-2 py-2 text-center text-sm {% if d.day == today %}bg-rose-50 font-semibold text-rose-800{% endif %}">
+        <span class="block text-xs uppercase text-stone-500">{{ d.day|date:"D" }}</span>{{ d.day|date:"j" }}
+      </div>
+      {% endfor %}
+
+      {% localize off %}
+      <div class="relative" style="height: {{ week.grid_height_px }}px" aria-hidden="true">
+        {% for h in week.hours %}
+        <div class="absolute right-2 -translate-y-1/2 text-xs text-stone-400" style="top: {% widthratio forloop.counter0 week.hours|length 100 %}%">{% if not forloop.first %}{{ h|stringformat:"02d" }}:00{% endif %}</div>
+        {% endfor %}
+      </div>
+      {% for d in week.days %}
+      <div class="relative border-l border-stone-200 {% if d.day == today %}bg-rose-50/40{% endif %}" style="height: {{ week.grid_height_px }}px">
+        {% for h in week.hours %}{% if not forloop.first %}<div class="absolute inset-x-0 border-t border-stone-100" style="top: {% widthratio forloop.counter0 week.hours|length 100 %}%"></div>{% endif %}{% endfor %}
+        {% for p in d.bookings %}
+        {% with b=p.booking %}
+        <a href="{% url 'dashboard:booking' salon.slug b.pk %}"
+           hx-get="{% url 'dashboard:booking' salon.slug b.pk %}" hx-target="#booking-panel" hx-swap="innerHTML"
+           data-status="{{ b.status }}"
+           class="booking absolute overflow-hidden rounded-md border px-1.5 py-0.5 text-xs leading-tight shadow-sm hover:z-10 hover:shadow
+                  {% if b.status == 'no_show' %}border-stone-300 bg-stone-100 text-stone-500 line-through{% elif b.status == 'completed' %}border-stone-300 bg-stone-50 text-stone-600{% elif b.status == 'pending' %}border-dashed border-rose-300 bg-white text-stone-800{% else %}border-rose-200 bg-rose-100 text-rose-950{% endif %}"
+           style="top: {{ p.top|stringformat:'.3f' }}%; height: calc({{ p.height|stringformat:'.3f' }}% - 2px); left: calc({{ p.left|stringformat:'.3f' }}% + 2px); width: calc({{ p.width|stringformat:'.3f' }}% - 4px);"
+           title="{{ b.start_at|time:'H:i' }}–{{ b.end_at|time:'H:i' }} · {{ b.client.full_name }} · {{ b.service.name }} · {{ b.staff.full_name }} · {{ b.get_status_display }}">
+          <span class="font-semibold">{{ b.start_at|time:"H:i" }}</span> {{ b.client.full_name }}
+          <span class="block truncate opacity-80">{{ b.service.name }}{% if not selected_staff %} · {{ b.staff.full_name }}{% endif %}</span>
+          {% if b.status != 'confirmed' %}<span class="block truncate opacity-80">{{ b.get_status_display }}</span>{% endif %}
+        </a>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% endfor %}
+      {% endlocalize %}
+    </div>
+  </div>
+</section>

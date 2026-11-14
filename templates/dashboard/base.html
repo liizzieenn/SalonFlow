@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ salon.name }} · {% trans "Dashboard" %}{% endblock %}
+{% block body %}
+<header class="border-b border-stone-200 bg-white">
+  <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
+    <a href="{% url 'dashboard:home' %}" class="font-semibold tracking-tight">{{ salon.name|default:"SalonFlow" }}</a>
+    {% if salon %}
+    <nav class="flex gap-4 text-sm" aria-label="{% trans 'Dashboard' %}">
+      {% url 'dashboard:calendar' salon.slug as calendar_url %}
+      <a href="{{ calendar_url }}" class="{% if request.resolver_match.url_name == 'calendar' %}font-semibold text-rose-700{% else %}text-stone-600 hover:text-stone-900{% endif %}">{% trans "Calendar" %}</a>
+      {% if access.is_owner %}
+      <a href="{% url 'dashboard:analytics' salon.slug %}" class="{% if request.resolver_match.url_name == 'analytics' %}font-semibold text-rose-700{% else %}text-stone-600 hover:text-stone-900{% endif %}">{% trans "Analytics" %}</a>
+      {% endif %}
+    </nav>
+    {% endif %}
+    <form method="post" action="{% url 'logout' %}" class="ml-auto">
+      {% csrf_token %}
+      <span class="mr-3 text-sm text-stone-500">{{ request.user.get_full_name|default:request.user.username }}</span>
+      <button class="text-sm text-stone-600 hover:text-stone-900">{% trans "Log out" %}</button>
+    </form>
+  </div>
+</header>
+<main class="mx-auto max-w-7xl px-4 py-6">
+  {% block content %}{% endblock %}
+</main>
+{% endblock %}

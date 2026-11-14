@@ -1,0 +1,174 @@
+{% extends "dashboard/base.html" %}
+{% load i18n l10n %}
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.js" integrity="sha384-zYPBGXwO4633CABX/5Spf6emCKUJCfoOkhOMYyxMsatqQZPnDblmmOewfjsIVWCM" crossorigin="anonymous" defer></script>
+<style>
+  .viz-root {
+    --surface-1: #ffffff;
+    --text-primary: #1c1917;
+    --text-secondary: #57534e;
+    --gridline: #e7e5e4;
+    --series-1: #2a78d6;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="viz-root">
+  <div class="mb-4 flex flex-wrap items-center gap-3">
+    <h1 class="text-lg font-semibold">{% trans "Analytics" %}</h1>
+    <nav class="ml-auto flex rounded-lg border border-stone-200 bg-white p-0.5 text-sm" aria-label="{% trans 'Time range' %}">
+      {% for r in ranges %}
+      <a href="?days={{ r }}" class="rounded-md px-3 py-1 {% if r == days %}bg-stone-900 text-white{% else %}text-stone-600 hover:text-stone-900{% endif %}" {% if r == days %}aria-current="page"{% endif %}>{% blocktrans %}{{ r }} days{% endblocktrans %}</a>
+      {% endfor %}
+    </nav>
+  </div>
+  <p class="mb-4 text-sm text-stone-500">{{ period.start|date:"j M Y" }} – {% now "j M Y" %} · {% blocktrans %}compared with the previous {{ days }} days{% endblocktrans %}</p>
+
+  {# KPI tiles #}
+  <div class="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-5">
+    <div class="col-span-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 lg:col-span-1">
+      <p class="text-sm text-stone-500">{% trans "Revenue" %}</p>
+      <p class="mt-1 text-4xl font-semibold tracking-tight" data-kpi="revenue">{{ summary.revenue|floatformat:"0g" }} ₾</p>
+      {% include "dashboard/partials/_delta.html" with value=revenue_change %}
+    </div>
+    <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
+      <p class="text-sm text-stone-500">{% trans "Bookings" %}</p>
+      <p class="mt-1 text-2xl font-semibold" data-kpi="booked">{{ summary.booked }}</p>
+      {% include "dashboard/partials/_delta.html" with value=booked_change %}
+    </div>
+    <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
+      <p class="text-sm text-stone-500">{% trans "Average visit" %}</p>
+      <p class="mt-1 text-2xl font-semibold" data-kpi="average">{% if summary.average_value is not None %}{{ summary.average_value|floatformat:"0g" }} ₾{% else %}—{% endif %}</p>
+      <p class="mt-1 text-xs text-stone-500">{% blocktrans count n=summary.attended %}{{ n }} visit{% plural %}{{ n }} visits{% endblocktrans %}</p>
+    </div>
+    <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
+      <p class="text-sm text-stone-500">{% trans "No-show rate" %}</p>
+      <p class="mt-1 text-2xl font-semibold" data-kpi="no-show">{% if no_show_pct is not None %}{{ no_show_pct|floatformat:1 }}%{% else %}—{% endif %}</p>
+      <p class="mt-1 text-xs text-stone-500">{% blocktrans count n=summary.no_shows %}{{ n }} no-show{% plural %}{{ n }} no-shows{% endblocktrans %}</p>
+    </div>
+    <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
+      <p class="text-sm text-stone-500">{% trans "Cancellation rate" %}</p>
+      <p class="mt-1 text-2xl font-semibold" data-kpi="cancellation">{% if cancellation_pct is not None %}{{ cancellation_pct|floatformat:1 }}%{% else %}—{% endif %}</p>
+      <p class="mt-1 text-xs text-stone-500">{% blocktrans count n=summary.cancelled %}{{ n }} cancelled{% plural %}{{ n }} cancelled{% endblocktrans %}</p>
+    </div>
+  </div>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200 lg:col-span-2">
+      <h2 class="mb-3 font-semibold">{% trans "Revenue per day" %} <span class="font-normal text-stone-500">(₾)</span></h2>
+      {% if summary.revenue %}
+      <div class="relative h-64"><canvas id="chart-revenue" role="img" aria-label="{% trans 'Revenue per day' %}"></canvas></div>
+      {% else %}<p class="py-12 text-center text-sm text-stone-500">{% trans "No revenue in this period yet." %}</p>{% endif %}
+      <details class="mt-3 text-sm">
+        <summary class="cursor-pointer text-stone-500">{% trans "Show as table" %}</summary>
+        <table class="mt-2 w-full max-w-sm"><thead><tr class="text-left text-stone-500"><th class="font-normal">{% trans "Day" %}</th><th class="text-right font-normal">{% trans "Revenue" %}</th></tr></thead>
+          <tbody>{% for d, v in by_day %}<tr><td>{{ d|date:"D j M" }}</td><td class="text-right tabular-nums">{{ v|floatformat:2 }} ₾</td></tr>{% endfor %}</tbody></table>
+      </details>
+    </section>
+
+    <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
+      <h2 class="mb-3 font-semibold">{% trans "Busiest hours" %} <span class="font-normal text-stone-500">({% trans "bookings by start time" %})</span></h2>
+      {% if by_hour %}
+      <div class="relative h-64"><canvas id="chart-hours" role="img" aria-label="{% trans 'Busiest hours' %}"></canvas></div>
+      {% else %}<p class="py-12 text-center text-sm text-stone-500">{% trans "No bookings in this period yet." %}</p>{% endif %}
+      <details class="mt-3 text-sm">
+        <summary class="cursor-pointer text-stone-500">{% trans "Show as table" %}</summary>
+        <table class="mt-2 w-full max-w-xs"><thead><tr class="text-left text-stone-500"><th class="font-normal">{% trans "Hour" %}</th><th class="text-right font-normal">{% trans "Bookings" %}</th></tr></thead>
+          <tbody>{% for h, n in by_hour %}<tr><td>{{ h|stringformat:"02d" }}:00</td><td class="text-right tabular-nums">{{ n }}</td></tr>{% endfor %}</tbody></table>
+      </details>
+    </section>
+
+    <section class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-stone-200">
+      <h2 class="mb-3 font-semibold">{% trans "Top services" %} <span class="font-normal text-stone-500">({% trans "bookings" %})</span></h2>
+      {% if services %}
+      <div class="relative h-64"><canvas id="chart-services" role="img" aria-label="{% trans 'Top services' %}"></canvas></div>
+      {% else %}<p class="py-12 text-center text-sm text-stone-500">{% trans "No bookings in this period yet." %}</p>{% endif %}
+      <details class="mt-3 text-sm">
+        <summary class="cursor-pointer text-stone-500">{% trans "Show as table" %}</summary>
+        <table class="mt-2 w-full"><thead><tr class="text-left text-stone-500"><th class="font-normal">{% trans "Service" %}</th><th class="text-right font-normal">{% trans "Bookings" %}</th><th class="text-right font-normal">{% trans "Revenue" %}</th></tr></thead>
+          <tbody>{% for s in services %}<tr><td>{{ s.name }}</td><td class="text-right tabular-nums">{{ s.bookings }}</td><td class="text-right tabular-nums">{{ s.revenue|floatformat:2 }} ₾</td></tr>{% endfor %}</tbody></table>
+      </details>
+    </section>
+  </div>
+</div>
+{{ chart_data|json_script:"chart-data" }}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  if (!window.Chart) return;  // CDN blocked: tables remain available
+  const data = JSON.parse(document.getElementById("chart-data").textContent);
+  const css = getComputedStyle(document.querySelector(".viz-root"));
+  const v = (name) => css.getPropertyValue(name).trim();
+  const lang = document.documentElement.lang || "en";
+  const fmt = new Intl.NumberFormat(lang, { maximumFractionDigits: 0 });
+  const day = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short" });
+
+  Chart.defaults.font.family = "ui-sans-serif, system-ui, sans-serif";
+  Chart.defaults.color = v("--text-secondary");
+
+  const bar = (horizontal = false) => ({
+    backgroundColor: v("--series-1"),
+    hoverBackgroundColor: v("--series-1"),
+    borderRadius: 4,
+    borderSkipped: "start",   // square at the baseline, rounded data-end
+    maxBarThickness: 24,
+    categoryPercentage: 0.8,
+    barPercentage: 0.9,
+  });
+  const axis = (extra = {}) => ({
+    grid: { color: v("--gridline"), lineWidth: 1, drawTicks: false },
+    border: { display: false },
+    ticks: { padding: 6, ...extra },
+  });
+  const base = (horizontal, tooltipLabel) => ({
+    indexAxis: horizontal ? "y" : "x",
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: "index", intersect: false },  // hover anywhere in the band
+    plugins: {
+      legend: { display: false },  // single series: the title names it
+      tooltip: {
+        backgroundColor: v("--text-primary"),
+        padding: 8,
+        displayColors: false,
+        callbacks: { label: tooltipLabel },
+      },
+    },
+  });
+
+  const revenue = document.getElementById("chart-revenue");
+  if (revenue) {
+    const opts = base(false, (c) => `${fmt.format(c.parsed.y)} ₾`);
+    opts.scales = {
+      x: { ...axis({ maxRotation: 0, autoSkip: true, maxTicksLimit: 10,
+            callback: (i) => day.format(new Date(data.revenue.labels[i])) }), grid: { display: false } },
+      y: { ...axis({ callback: (val) => fmt.format(val) }), beginAtZero: true },
+    };
+    opts.plugins.tooltip.callbacks.title = (items) => day.format(new Date(data.revenue.labels[items[0].dataIndex]));
+    new Chart(revenue, { type: "bar", data: { labels: data.revenue.labels, datasets: [{ data: data.revenue.values, ...bar() }] }, options: opts });
+  }
+
+  const hours = document.getElementById("chart-hours");
+  if (hours) {
+    const opts = base(false, (c) => `${c.parsed.y} ${c.parsed.y === 1 ? "{{ _('booking')|escapejs }}" : "{{ _('bookings')|escapejs }}"}`);
+    opts.scales = {
+      x: { ...axis({ maxRotation: 0 }), grid: { display: false } },
+      y: { ...axis({ precision: 0 }), beginAtZero: true },
+    };
+    new Chart(hours, { type: "bar", data: { labels: data.hours.labels, datasets: [{ data: data.hours.values, ...bar() }] }, options: opts });
+  }
+
+  const services = document.getElementById("chart-services");
+  if (services) {
+    const opts = base(true, (c) => `${c.parsed.x} ${c.parsed.x === 1 ? "{{ _('booking')|escapejs }}" : "{{ _('bookings')|escapejs }}"}`);
+    opts.scales = {
+      x: { ...axis({ precision: 0 }), beginAtZero: true },
+      y: { ...axis(), grid: { display: false } },
+    };
+    new Chart(services, { type: "bar", data: { labels: data.services.labels, datasets: [{ data: data.services.values, ...bar(true) }] }, options: opts });
+  }
+});
+</script>
+{% endblock %}
