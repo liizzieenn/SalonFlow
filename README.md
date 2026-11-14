@@ -51,7 +51,7 @@ Client (browser) ──► Django (HTMX views + REST API)
 - [x] **M1 — Core:** project setup, Docker, models (Salon, Staff, Service, Booking, Client), admin
 - [x] **M2 — Booking engine:** free-slot calculation, booking flow, conflict prevention, tests
 - [x] **M3 — Notifications:** Celery + Redis, email/SMS reminders
-- [ ] **M4 — Dashboard:** owner calendar + analytics charts
+- [x] **M4 — Dashboard:** owner calendar + analytics charts
 - [ ] **M5 — AI assistant:** pgvector embeddings, RAG chat over services/FAQ, slot suggestions
 - [ ] **M6 — i18n:** Georgian / English
 - [ ] **M7 — Ship:** CI, deployment, demo data, screenshots, live demo link
@@ -68,7 +68,7 @@ docker compose up --build
 docker compose exec web python manage.py createsuperuser
 ```
 
-App: http://localhost:8000 · Booking page: http://localhost:8000/s/&lt;salon-slug&gt;/book/ · Admin: http://localhost:8000/admin/ · Health: http://localhost:8000/health/
+App: http://localhost:8000 · Booking page: http://localhost:8000/s/&lt;salon-slug&gt;/book/ · Dashboard: http://localhost:8000/dashboard/ · Admin: http://localhost:8000/admin/ · Health: http://localhost:8000/health/
 
 ### Without Docker
 
@@ -101,7 +101,7 @@ apps/
   clients/           per-salon Client profiles
   bookings/          Booking, slot engine, booking service, HTMX booking flow
   notifications/     confirmation + reminder tasks, pluggable SMS backends
-  dashboard/         owner analytics (M4)
+  dashboard/         owner/staff calendar, booking status, analytics
   assistant/         RAG AI chat (M5)
 tests/               pytest suite + factory_boy factories
 docker/              container entrypoint
@@ -137,6 +137,23 @@ docker/              container entrypoint
   (tests) and `TwilioBackend` (production). A new provider only needs to implement
   `send_messages()`.
 - Messages are rendered in the client's preferred language and the salon's time zone.
+
+### Dashboard
+
+- **Access control** (`apps/dashboard/access.py`): owners see their salon's whole
+  calendar and analytics. Staff with a linked login see only their own bookings, and
+  revenue analytics are owner-only (403). Anyone else gets a 404, so a salon's existence
+  isn't revealed.
+- **Week calendar:** bookings are positioned on a day × time grid in the salon's time
+  zone. In the all-staff view each specialist has a fixed column; there is also a
+  per-specialist filter. Clicking a booking opens a detail panel (HTMX) where staff can
+  mark it completed or no-show, or cancel it, and the grid refreshes itself.
+- **Analytics** (`apps/dashboard/analytics.py`): revenue, bookings, average visit,
+  no-show and cancellation rates with change vs. the previous period, plus charts
+  (Chart.js) for revenue per day, busiest hours and top services. Every chart also has
+  a table view. All aggregation runs in PostgreSQL, grouped by the salon's local day
+  and hour. Revenue counts completed visits plus past visits not flagged as no-show or
+  cancelled.
 
 ### Data integrity highlights
 

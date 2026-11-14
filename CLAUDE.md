@@ -45,6 +45,11 @@ M3 done: `apps/notifications` — `Notification` delivery log, Celery tasks
 backends (`SMS_BACKEND`: console / locmem / twilio), email + SMS templates in
 `templates/notifications/`. Confirmation is queued from `create_booking` via on_commit.
 
+M4 done: `apps/dashboard` — login (Django auth views, `templates/registration/`),
+access rules in `access.py` (owner: all; staff: own bookings, no analytics; others: 404),
+week calendar (`calendar.py`), booking status changes (`change_status` in
+`apps/bookings/services.py`), analytics queries (`analytics.py`) + Chart.js charts.
+
 Notes:
 - Notifications are idempotent per (booking, kind, channel) — unique constraint + row lock.
   Reminder lead times live in `BOOKING_REMINDER_HOURS`.
@@ -57,5 +62,5 @@ Notes:
 - Tests require PostgreSQL (not SQLite).
 
 ## Next step
-Start M4: owner dashboard — calendar view of bookings and analytics (revenue, busiest
-hours, top services, no-show rate).
+Start M5: AI assistant — pgvector embeddings of services/FAQ, RAG chat that answers
+questions and suggests free slots (use the slot engine).
