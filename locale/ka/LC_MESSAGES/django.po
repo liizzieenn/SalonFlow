@@ -16,7 +16,7 @@ msgstr ""
 
 #: apps/accounts/admin.py
 msgid "Contact"
-msgstr "საკონტაქტო"
+msgstr "საკონტაქტო ინფორმაცია"
 
 #: apps/accounts/apps.py
 msgid "Accounts"
@@ -241,7 +241,7 @@ msgstr "ამ თანამშრომელს ამ დროს უკ�
 
 #: apps/bookings/models.py
 msgid "Must belong to the same salon as the booking."
-msgstr "უნდა ეკუთვნოდეს იმავე სალონს, რომელსაც ჯავშანი."
+msgstr "უნდა ეკუთვნოდეს იმავე სალონს, რასაც ჯავშანი."
 
 #: apps/bookings/models.py
 msgid "This staff member does not offer this service."
@@ -511,7 +511,7 @@ msgstr "მიზეზი"
 
 #: apps/salons/models.py
 msgid "time off"
-msgstr "დასვენება"
+msgstr "არასამუშაო დღეები"
 
 #: templates/assistant/partials/messages.html
 msgid "Free times"
