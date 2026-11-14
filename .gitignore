@@ -16,3 +16,6 @@ htmlcov/
 node_modules/
 celerybeat-schedule*
 dump.rdb
+
+# Built by `npm run build` (Docker builds it too)
+static/css/
