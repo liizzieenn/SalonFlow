@@ -101,11 +101,11 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Internationalisation — Georgian and English.
-LANGUAGE_CODE = "en"
+# Internationalisation — Georgian (default, no URL prefix) and English (/en/).
+LANGUAGE_CODE = "ka"
 LANGUAGES = [
-    ("en", _("English")),
     ("ka", _("Georgian")),
+    ("en", _("English")),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 TIME_ZONE = "Asia/Tbilisi"

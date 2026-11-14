@@ -6,6 +6,7 @@ from urllib.parse import parse_qs, urlparse
 from zoneinfo import ZoneInfo
 
 import pytest
+from django.urls import reverse
 
 from apps.assistant import chat, knowledge
 from apps.assistant.models import FAQ, KnowledgeChunk
@@ -216,7 +217,7 @@ def test_booking_question_suggests_free_slots(salon):
     ]
     assert len(result.slots) == 6
     url = urlparse(result.slots[0].url)
-    assert url.path == "/s/kb/book/details/"
+    assert url.path == reverse("bookings:details", args=["kb"])
     params = parse_qs(url.query)
     assert params["staff"] == ["any"]
     assert params["service"] == [str(salon.services.get(name="Manicure").pk)]

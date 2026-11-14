@@ -19,4 +19,6 @@ def test_blank_phone_not_unique():
 
 
 def test_default_language_is_georgian():
-    assert ClientFactory().preferred_language == "ka"
+    from apps.clients.models import Client
+
+    assert Client().preferred_language == "ka"
