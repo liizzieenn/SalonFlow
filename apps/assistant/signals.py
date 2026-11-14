@@ -6,6 +6,10 @@ broker outage never breaks saving in the admin.
 
 from __future__ import annotations
 
+import threading
+from collections.abc import Iterator
+from contextlib import contextmanager
+
 from django.db import transaction
 from django.db.models.signals import m2m_changed, post_delete, post_save
 from django.dispatch import receiver
@@ -17,7 +21,26 @@ from .models import FAQ, KnowledgeChunk
 Source = KnowledgeChunk.Source
 
 
+_state = threading.local()
+
+
+@contextmanager
+def suppress_indexing() -> Iterator[None]:
+    """Skip per-object re-index tasks, e.g. during bulk imports or ``seed_demo``.
+
+    The caller is responsible for re-indexing afterwards (``reindex_salon``).
+    """
+    previous = getattr(_state, "suppressed", False)
+    _state.suppressed = True
+    try:
+        yield
+    finally:
+        _state.suppressed = previous
+
+
 def queue_index(source: str, source_id: int) -> None:
+    if getattr(_state, "suppressed", False):
+        return
     from .tasks import index_source
 
     def send() -> None:
