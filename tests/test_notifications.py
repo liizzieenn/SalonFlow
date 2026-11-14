@@ -199,7 +199,9 @@ def test_create_booking_sends_confirmation_after_commit(
             service=service,
             staff=staff,
             start_at=datetime.combine(day, time(10), tzinfo=TZ),
-            client_details=ClientDetails("Nino", "+995555123456", "nino@example.com"),
+            client_details=ClientDetails(
+                "Nino", "+995555123456", "nino@example.com", language="en"
+            ),
         )
     assert not mail.outbox  # nothing before commit
     assert len(callbacks) == 1

@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 from django import forms
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.salons.models import Salon, Service, Staff
@@ -195,6 +195,7 @@ def confirm(request: HttpRequest, salon_slug: str) -> HttpResponse:
                     full_name=data["full_name"],
                     phone=data["phone"],
                     email=data["email"],
+                    language=translation.get_language(),
                 ),
                 notes=data["notes"],
                 user=request.user if request.user.is_authenticated else None,

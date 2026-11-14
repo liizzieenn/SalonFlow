@@ -28,6 +28,8 @@ from apps.salons.models import Salon, Service, Staff
 from .models import Booking
 from .slots import is_slot_available
 
+LANGUAGE_CODES = set(Client.Language.values)
+
 
 class BookingError(Exception):
     """Base class for booking failures that should be shown to the user."""
@@ -57,24 +59,28 @@ class ClientDetails:
     full_name: str
     phone: str
     email: str = ""
+    #: UI language the client booked in; used for their notifications.
+    language: str = ""
 
 
 def get_or_create_client(salon: Salon, details: ClientDetails, user=None) -> Client:
     """Find the salon's client by phone number, or create one.
 
-    Existing clients get their name/email refreshed with the latest input.
+    Existing clients get their name, email and preferred language refreshed with
+    the latest input.
     """
+    language = details.language if details.language in LANGUAGE_CODES else ""
+    defaults = {"full_name": details.full_name, "email": details.email, "user": user}
+    if language:
+        defaults["preferred_language"] = language
     client, created = Client.objects.get_or_create(
-        salon=salon,
-        phone=details.phone,
-        defaults={
-            "full_name": details.full_name,
-            "email": details.email,
-            "user": user,
-        },
+        salon=salon, phone=details.phone, defaults=defaults
     )
     if not created:
         changed = False
+        if language and client.preferred_language != language:
+            client.preferred_language = language
+            changed = True
         for field in ("full_name", "email"):
             value = getattr(details, field)
             if value and getattr(client, field) != value:
