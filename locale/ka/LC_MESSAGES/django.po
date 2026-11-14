@@ -1,0 +1,924 @@
+# Georgian translation of SalonFlow.
+# Regenerate with: python manage.py makemessages -l ka -e html,txt,py --ignore=.venv --ignore=staticfiles --ignore=tests --add-location=file --no-obsolete
+msgid ""
+msgstr ""
+"Project-Id-Version: SalonFlow\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-14 13:36+0400\n"
+"PO-Revision-Date: 2026-11-14 14:00+0400\n"
+"Last-Translator: SalonFlow team\n"
+"Language-Team: Georgian\n"
+"Language: ka\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: apps/accounts/admin.py
+msgid "Contact"
+msgstr "საკონტაქტო ინფორმაცია"
+
+#: apps/accounts/apps.py
+msgid "Accounts"
+msgstr "ანგარიშები"
+
+#: apps/accounts/models.py
+msgid "email address"
+msgstr "ელფოსტის მისამართი"
+
+#: apps/accounts/models.py apps/clients/models.py apps/salons/models.py
+msgid "phone number"
+msgstr "ტელეფონის ნომერი"
+
+#: apps/accounts/models.py
+msgid "user"
+msgstr "მომხმარებელი"
+
+#: apps/accounts/models.py
+msgid "users"
+msgstr "მომხმარებლები"
+
+#: apps/assistant/admin.py
+msgid "Rebuild the index of the selected chunks' salons"
+msgstr "არჩეული ფრაგმენტების სალონების ინდექსის განახლება"
+
+#: apps/assistant/admin.py
+#, python-format
+msgid "Queued re-indexing for %d salon(s)."
+msgstr "ხელახალი ინდექსირება დაიგეგმა %d სალონისთვის."
+
+#: apps/assistant/apps.py
+msgid "AI assistant"
+msgstr "AI ასისტენტი"
+
+#: apps/assistant/chat.py
+msgid "Sorry, I can't help with that. Please contact the salon."
+msgstr "სამწუხაროდ, ამაში ვერ დაგეხმარებით. გთხოვთ, დაუკავშირდეთ სალონს."
+
+#: apps/assistant/models.py
+msgid "question"
+msgstr "კითხვა"
+
+#: apps/assistant/models.py
+msgid "answer"
+msgstr "პასუხი"
+
+#: apps/assistant/models.py apps/salons/models.py
+msgid "active"
+msgstr "აქტიური"
+
+#: apps/assistant/models.py
+msgid "order"
+msgstr "რიგითობა"
+
+#: apps/assistant/models.py
+msgid "FAQ entry"
+msgstr "ხშირად დასმული კითხვა"
+
+#: apps/assistant/models.py
+msgid "FAQ"
+msgstr "ხშირად დასმული კითხვები"
+
+#: apps/assistant/models.py templates/dashboard/analytics.html
+#: templates/dashboard/partials/booking_detail.html
+#: templates/notifications/email.html templates/notifications/email.txt
+msgid "Service"
+msgstr "მომსახურება"
+
+#: apps/assistant/models.py
+msgid "Salon info"
+msgstr "სალონის ინფორმაცია"
+
+#: apps/assistant/models.py apps/core/models.py apps/salons/models.py
+msgid "salon"
+msgstr "სალონი"
+
+#: apps/assistant/models.py
+msgid "source"
+msgstr "წყარო"
+
+#: apps/assistant/models.py
+msgid "source id"
+msgstr "წყაროს ID"
+
+#: apps/assistant/models.py apps/salons/models.py
+msgid "title"
+msgstr "სათაური"
+
+#: apps/assistant/models.py
+msgid "content"
+msgstr "შინაარსი"
+
+#: apps/assistant/models.py
+msgid "content hash"
+msgstr "შინაარსის ჰეში"
+
+#: apps/assistant/models.py
+msgid "embedding model"
+msgstr "ემბედინგის მოდელი"
+
+#: apps/assistant/models.py apps/core/models.py
+msgid "updated at"
+msgstr "განახლების დრო"
+
+#: apps/assistant/models.py
+msgid "knowledge chunk"
+msgstr "ცოდნის ფრაგმენტი"
+
+#: apps/assistant/models.py
+msgid "knowledge chunks"
+msgstr "ცოდნის ფრაგმენტები"
+
+#: apps/assistant/views.py
+#, python-format
+msgid "Please keep your question under %(n)d characters."
+msgstr "გთხოვთ, კითხვა %(n)d სიმბოლოზე მოკლე იყოს."
+
+#: apps/assistant/views.py
+msgid "You're sending messages too quickly. Please try again in a moment."
+msgstr "შეტყობინებებს ძალიან ხშირად აგზავნით. გთხოვთ, ცოტა ხანში სცადოთ."
+
+#: apps/assistant/views.py
+msgid "The assistant is unavailable right now. Please try again later."
+msgstr "ასისტენტი ამჟამად მიუწვდომელია. გთხოვთ, მოგვიანებით სცადოთ."
+
+#: apps/bookings/apps.py templates/dashboard/analytics.html
+msgid "Bookings"
+msgstr "ჯავშნები"
+
+#: apps/bookings/forms.py
+msgid "Full name"
+msgstr "სახელი და გვარი"
+
+#: apps/bookings/forms.py
+msgid "Phone number"
+msgstr "ტელეფონის ნომერი"
+
+#: apps/bookings/forms.py
+msgid "We will use it to remind you about the visit."
+msgstr "ვიზიტის შეხსენებას ამ ნომერზე გამოგიგზავნით."
+
+#: apps/bookings/forms.py
+msgid "Email (optional)"
+msgstr "ელფოსტა (არასავალდებულო)"
+
+#: apps/bookings/forms.py
+msgid "Notes (optional)"
+msgstr "შენიშვნა (არასავალდებულო)"
+
+#: apps/bookings/forms.py
+msgid "Enter a valid phone number, e.g. +995555123456."
+msgstr "შეიყვანეთ სწორი ტელეფონის ნომერი, მაგ. +995555123456."
+
+#: apps/bookings/models.py apps/notifications/models.py
+msgid "Pending"
+msgstr "მოლოდინში"
+
+#: apps/bookings/models.py
+msgid "Confirmed"
+msgstr "დადასტურებული"
+
+#: apps/bookings/models.py
+msgid "Completed"
+msgstr "დასრულებული"
+
+#: apps/bookings/models.py
+msgid "Cancelled"
+msgstr "გაუქმებული"
+
+#: apps/bookings/models.py
+msgid "No-show"
+msgstr "არ გამოცხადდა"
+
+#: apps/bookings/models.py apps/clients/models.py
+msgid "client"
+msgstr "კლიენტი"
+
+#: apps/bookings/models.py apps/salons/models.py
+msgid "staff member"
+msgstr "თანამშრომელი"
+
+#: apps/bookings/models.py apps/salons/models.py
+msgid "service"
+msgstr "მომსახურება"
+
+#: apps/bookings/models.py apps/salons/models.py
+msgid "starts at"
+msgstr "დაწყების დრო"
+
+#: apps/bookings/models.py apps/salons/models.py
+msgid "ends at"
+msgstr "დასრულების დრო"
+
+#: apps/bookings/models.py apps/notifications/models.py
+msgid "status"
+msgstr "სტატუსი"
+
+#: apps/bookings/models.py apps/salons/models.py
+msgid "price (GEL)"
+msgstr "ფასი (ლარი)"
+
+#: apps/bookings/models.py
+msgid "Price snapshot at booking time."
+msgstr "ფასი დაჯავშნის მომენტისთვის."
+
+#: apps/bookings/models.py apps/clients/models.py
+msgid "notes"
+msgstr "შენიშვნები"
+
+#: apps/bookings/models.py apps/notifications/models.py
+#: templates/dashboard/analytics.html
+msgid "booking"
+msgstr "ჯავშანი"
+
+#: apps/bookings/models.py templates/dashboard/analytics.html
+msgid "bookings"
+msgstr "ჯავშნები"
+
+#: apps/bookings/models.py
+msgid "This staff member already has a booking at that time."
+msgstr "ამ თანამშრომელს ამ დროს უკვე აქვს ჯავშანი."
+
+#: apps/bookings/models.py
+msgid "Must belong to the same salon as the booking."
+msgstr "უნდა ეკუთვნოდეს იმავე სალონს, რასაც ჯავშანი."
+
+#: apps/bookings/models.py
+msgid "This staff member does not offer this service."
+msgstr "ეს თანამშრომელი ამ მომსახურებას არ ასრულებს."
+
+#: apps/bookings/models.py apps/salons/models.py
+msgid "End must be after start."
+msgstr "დასრულება დაწყების შემდეგ უნდა იყოს."
+
+#: apps/bookings/services.py
+msgid "The booking could not be created."
+msgstr "ჯავშნის შექმნა ვერ მოხერხდა."
+
+#: apps/bookings/services.py
+msgid "Sorry, this time slot is no longer available. Please pick another."
+msgstr "სამწუხაროდ, ეს დრო უკვე დაკავებულია. გთხოვთ, აირჩიოთ სხვა."
+
+#: apps/bookings/services.py
+msgid "The selected service or staff member is not available."
+msgstr "არჩეული მომსახურება ან სპეციალისტი მიუწვდომელია."
+
+#: apps/bookings/services.py
+msgid "This status change is not allowed."
+msgstr "სტატუსის ასეთი ცვლილება დაუშვებელია."
+
+#: apps/clients/apps.py
+msgid "Clients"
+msgstr "კლიენტები"
+
+#: apps/clients/models.py config/settings/base.py
+msgid "Georgian"
+msgstr "ქართული"
+
+#: apps/clients/models.py config/settings/base.py
+msgid "English"
+msgstr "ინგლისური"
+
+#: apps/clients/models.py apps/salons/models.py
+msgid "user account"
+msgstr "მომხმარებლის ანგარიში"
+
+#: apps/clients/models.py apps/salons/models.py
+msgid "full name"
+msgstr "სახელი და გვარი"
+
+#: apps/clients/models.py apps/salons/models.py
+msgid "email"
+msgstr "ელფოსტა"
+
+#: apps/clients/models.py
+msgid "preferred language"
+msgstr "სასურველი ენა"
+
+#: apps/clients/models.py
+msgid "clients"
+msgstr "კლიენტები"
+
+#: apps/core/apps.py
+msgid "Core"
+msgstr "ბირთვი"
+
+#: apps/core/models.py
+msgid "created at"
+msgstr "შექმნის დრო"
+
+#: apps/dashboard/apps.py templates/dashboard/base.html
+msgid "Dashboard"
+msgstr "მართვის პანელი"
+
+#: apps/notifications/apps.py
+msgid "Notifications"
+msgstr "შეტყობინებები"
+
+#: apps/notifications/models.py
+msgid "Booking confirmation"
+msgstr "ჯავშნის დადასტურება"
+
+#: apps/notifications/models.py
+msgid "Reminder 24 hours before"
+msgstr "შეხსენება 24 საათით ადრე"
+
+#: apps/notifications/models.py
+msgid "Reminder 2 hours before"
+msgstr "შეხსენება 2 საათით ადრე"
+
+#: apps/notifications/models.py
+#: templates/dashboard/partials/booking_detail.html
+msgid "Email"
+msgstr "ელფოსტა"
+
+#: apps/notifications/models.py
+msgid "SMS"
+msgstr "SMS"
+
+#: apps/notifications/models.py
+msgid "Sent"
+msgstr "გაგზავნილი"
+
+#: apps/notifications/models.py
+msgid "Failed"
+msgstr "ვერ გაიგზავნა"
+
+#: apps/notifications/models.py
+msgid "kind"
+msgstr "ტიპი"
+
+#: apps/notifications/models.py
+msgid "channel"
+msgstr "არხი"
+
+#: apps/notifications/models.py
+msgid "recipient"
+msgstr "მიმღები"
+
+#: apps/notifications/models.py
+msgid "attempts"
+msgstr "მცდელობები"
+
+#: apps/notifications/models.py
+msgid "last error"
+msgstr "ბოლო შეცდომა"
+
+#: apps/notifications/models.py
+msgid "sent at"
+msgstr "გაგზავნის დრო"
+
+#: apps/notifications/models.py
+msgid "notification"
+msgstr "შეტყობინება"
+
+#: apps/notifications/models.py
+msgid "notifications"
+msgstr "შეტყობინებები"
+
+#: apps/salons/admin.py
+msgid "Rebuild AI assistant index"
+msgstr "AI ასისტენტის ინდექსის განახლება"
+
+#: apps/salons/admin.py
+msgid "Queued assistant re-indexing."
+msgstr "ასისტენტის ხელახალი ინდექსირება დაიგეგმა."
+
+#: apps/salons/admin.py
+#, python-format
+msgid "Services from another salon: %(names)s"
+msgstr "სხვა სალონის მომსახურებები: %(names)s"
+
+#: apps/salons/apps.py
+msgid "Salons"
+msgstr "სალონები"
+
+#: apps/salons/models.py
+msgid "Monday"
+msgstr "ორშაბათი"
+
+#: apps/salons/models.py
+msgid "Tuesday"
+msgstr "სამშაბათი"
+
+#: apps/salons/models.py
+msgid "Wednesday"
+msgstr "ოთხშაბათი"
+
+#: apps/salons/models.py
+msgid "Thursday"
+msgstr "ხუთშაბათი"
+
+#: apps/salons/models.py
+msgid "Friday"
+msgstr "პარასკევი"
+
+#: apps/salons/models.py
+msgid "Saturday"
+msgstr "შაბათი"
+
+#: apps/salons/models.py
+msgid "Sunday"
+msgstr "კვირა"
+
+#: apps/salons/models.py
+msgid "name"
+msgstr "სახელწოდება"
+
+#: apps/salons/models.py
+msgid "slug"
+msgstr "URL-იდენტიფიკატორი"
+
+#: apps/salons/models.py
+msgid "owner"
+msgstr "მფლობელი"
+
+#: apps/salons/models.py
+msgid "address"
+msgstr "მისამართი"
+
+#: apps/salons/models.py
+msgid "city"
+msgstr "ქალაქი"
+
+#: apps/salons/models.py
+msgid "time zone"
+msgstr "დროის სარტყელი"
+
+#: apps/salons/models.py
+msgid "salons"
+msgstr "სალონები"
+
+#: apps/salons/models.py
+msgid "description"
+msgstr "აღწერა"
+
+#: apps/salons/models.py
+msgid "duration (minutes)"
+msgstr "ხანგრძლივობა (წუთი)"
+
+#: apps/salons/models.py
+msgid "buffer after (minutes)"
+msgstr "შუალედი ვიზიტის შემდეგ (წუთი)"
+
+#: apps/salons/models.py
+msgid "Clean-up / preparation time blocked after the appointment."
+msgstr "ვიზიტის შემდეგ დასუფთავებისა და მომზადებისთვის დაბლოკილი დრო."
+
+#: apps/salons/models.py
+msgid "services"
+msgstr "მომსახურებები"
+
+#: apps/salons/models.py
+msgid "bio"
+msgstr "ბიოგრაფია"
+
+#: apps/salons/models.py
+msgid "staff"
+msgstr "პერსონალი"
+
+#: apps/salons/models.py
+msgid "weekday"
+msgstr "კვირის დღე"
+
+#: apps/salons/models.py
+msgid "start time"
+msgstr "დაწყების დრო"
+
+#: apps/salons/models.py
+msgid "end time"
+msgstr "დასრულების დრო"
+
+#: apps/salons/models.py
+msgid "End time must be after start time."
+msgstr "დასრულების დრო დაწყების დროის შემდეგ უნდა იყოს."
+
+#: apps/salons/models.py
+msgid "working hours"
+msgstr "სამუშაო საათები"
+
+#: apps/salons/models.py
+msgid "break"
+msgstr "შესვენება"
+
+#: apps/salons/models.py
+msgid "breaks"
+msgstr "შესვენებები"
+
+#: apps/salons/models.py
+msgid "reason"
+msgstr "მიზეზი"
+
+#: apps/salons/models.py
+msgid "time off"
+msgstr "არასამუშაო დღეები"
+
+#: templates/assistant/partials/messages.html
+msgid "Free times"
+msgstr "თავისუფალი დროები"
+
+#: templates/assistant/partials/messages.html
+#, python-format
+msgid "Book %(service)s"
+msgstr "დაჯავშნა: %(service)s"
+
+#: templates/assistant/partials/messages.html
+msgid "Sources:"
+msgstr "წყაროები:"
+
+#: templates/assistant/widget.html
+msgid "Ask our assistant"
+msgstr "ჰკითხეთ ჩვენს ასისტენტს"
+
+#: templates/assistant/widget.html
+msgid "Salon assistant"
+msgstr "სალონის ასისტენტი"
+
+#: templates/assistant/widget.html
+msgid "Answers from this salon's information. Ask in Georgian or English."
+msgstr ""
+"პასუხობს სალონის ინფორმაციის მიხედვით. მკითხეთ ქართულად ან ინგლისურად."
+
+#: templates/assistant/widget.html
+msgid "Clear"
+msgstr "გასუფთავება"
+
+#: templates/assistant/widget.html
+msgid "Close"
+msgstr "დახურვა"
+
+#: templates/assistant/widget.html
+msgid ""
+"Hi! Ask me about services, prices, opening hours — or when there's a free "
+"time."
+msgstr ""
+"გამარჯობა! მკითხეთ მომსახურებების, ფასების, სამუშაო საათების ან თავისუფალი "
+"დროის შესახებ."
+
+#: templates/assistant/widget.html
+msgid "Thinking…"
+msgstr "ვფიქრობ…"
+
+#: templates/assistant/widget.html
+msgid "Your question"
+msgstr "თქვენი კითხვა"
+
+#: templates/assistant/widget.html
+msgid "e.g. How much is a manicure?"
+msgstr "მაგ. რა ღირს მანიკური?"
+
+#: templates/assistant/widget.html
+msgid "Send"
+msgstr "გაგზავნა"
+
+#: templates/bookings/book.html
+#, python-format
+msgid "Book at %(name)s"
+msgstr "დაჯავშნა — %(name)s"
+
+#: templates/bookings/partials/dates.html
+#: templates/bookings/partials/details.html
+#: templates/bookings/partials/slots.html
+#: templates/bookings/partials/staff.html
+msgid "Back"
+msgstr "უკან"
+
+#: templates/bookings/partials/dates.html
+msgid "Choose a day"
+msgstr "აირჩიეთ დღე"
+
+#: templates/bookings/partials/dates.html
+#: templates/bookings/partials/details.html
+#: templates/bookings/partials/slots.html
+#: templates/bookings/partials/staff.html
+msgid "Any specialist"
+msgstr "ნებისმიერი სპეციალისტი"
+
+#: templates/bookings/partials/details.html
+msgid "Your details"
+msgstr "თქვენი მონაცემები"
+
+#: templates/bookings/partials/details.html
+msgid "See free times"
+msgstr "თავისუფალი დროების ნახვა"
+
+#: templates/bookings/partials/details.html
+msgid "Confirm booking"
+msgstr "ჯავშნის დადასტურება"
+
+#: templates/bookings/partials/services.html
+msgid "Choose a service"
+msgstr "აირჩიეთ მომსახურება"
+
+#: templates/bookings/partials/services.html
+#, python-format
+msgid "%(minutes)s min"
+msgstr "%(minutes)s წთ"
+
+#: templates/bookings/partials/services.html
+msgid "No services available for online booking yet."
+msgstr "ონლაინ დაჯავშნისთვის მომსახურებები ჯერ არ არის."
+
+#: templates/bookings/partials/slots.html
+msgid "Choose a time"
+msgstr "აირჩიეთ დრო"
+
+#: templates/bookings/partials/slots.html
+msgid "No free time on this day. Please choose another day."
+msgstr "ამ დღეს თავისუფალი დრო არ არის. გთხოვთ, აირჩიოთ სხვა დღე."
+
+#: templates/bookings/partials/staff.html
+msgid "Choose a specialist"
+msgstr "აირჩიეთ სპეციალისტი"
+
+#: templates/bookings/partials/staff.html
+msgid "Earliest available"
+msgstr "უახლოესი თავისუფალი დრო"
+
+#: templates/bookings/partials/success.html
+msgid "You're booked!"
+msgstr "დაჯავშნილია!"
+
+#: templates/bookings/partials/success.html
+#, python-format
+msgid "We'll send a reminder to %(phone)s before your visit."
+msgstr "ვიზიტამდე შეხსენებას გამოგიგზავნით ნომერზე %(phone)s."
+
+#: templates/bookings/partials/success.html
+msgid "Book another appointment"
+msgstr "სხვა ვიზიტის დაჯავშნა"
+
+#: templates/dashboard/analytics.html templates/dashboard/base.html
+msgid "Analytics"
+msgstr "ანალიტიკა"
+
+#: templates/dashboard/analytics.html
+msgid "Time range"
+msgstr "პერიოდი"
+
+#: templates/dashboard/analytics.html
+#, python-format
+msgid "%(r)s days"
+msgstr "%(r)s დღე"
+
+#: templates/dashboard/analytics.html
+#, python-format
+msgid "compared with the previous %(days)s days"
+msgstr "წინა %(days)s დღესთან შედარებით"
+
+#: templates/dashboard/analytics.html
+msgid "Revenue"
+msgstr "შემოსავალი"
+
+#: templates/dashboard/analytics.html
+msgid "Average visit"
+msgstr "საშუალო ვიზიტი"
+
+#: templates/dashboard/analytics.html
+#, python-format
+msgid "%(n)s visit"
+msgid_plural "%(n)s visits"
+msgstr[0] "%(n)s ვიზიტი"
+msgstr[1] "%(n)s ვიზიტი"
+
+#: templates/dashboard/analytics.html
+msgid "No-show rate"
+msgstr "გამოუცხადებლობის მაჩვენებელი"
+
+#: templates/dashboard/analytics.html
+#, python-format
+msgid "%(n)s no-show"
+msgid_plural "%(n)s no-shows"
+msgstr[0] "%(n)s გამოუცხადებლობა"
+msgstr[1] "%(n)s გამოუცხადებლობა"
+
+#: templates/dashboard/analytics.html
+msgid "Cancellation rate"
+msgstr "გაუქმების მაჩვენებელი"
+
+#: templates/dashboard/analytics.html
+#, python-format
+msgid "%(n)s cancelled"
+msgid_plural "%(n)s cancelled"
+msgstr[0] "%(n)s გაუქმებული"
+msgstr[1] "%(n)s გაუქმებული"
+
+#: templates/dashboard/analytics.html
+msgid "Revenue per day"
+msgstr "შემოსავალი დღეების მიხედვით"
+
+#: templates/dashboard/analytics.html
+msgid "No revenue in this period yet."
+msgstr "ამ პერიოდში შემოსავალი ჯერ არ არის."
+
+#: templates/dashboard/analytics.html
+msgid "Show as table"
+msgstr "ცხრილად ჩვენება"
+
+#: templates/dashboard/analytics.html
+msgid "Day"
+msgstr "დღე"
+
+#: templates/dashboard/analytics.html
+msgid "Busiest hours"
+msgstr "ყველაზე დატვირთული საათები"
+
+#: templates/dashboard/analytics.html
+msgid "bookings by start time"
+msgstr "ჯავშნები დაწყების დროის მიხედვით"
+
+#: templates/dashboard/analytics.html
+msgid "No bookings in this period yet."
+msgstr "ამ პერიოდში ჯავშნები ჯერ არ არის."
+
+#: templates/dashboard/analytics.html
+msgid "Hour"
+msgstr "საათი"
+
+#: templates/dashboard/analytics.html
+msgid "Top services"
+msgstr "პოპულარული მომსახურებები"
+
+#: templates/dashboard/base.html templates/dashboard/booking_detail.html
+msgid "Calendar"
+msgstr "კალენდარი"
+
+#: templates/dashboard/base.html
+msgid "Log out"
+msgstr "გასვლა"
+
+#: templates/dashboard/calendar.html
+msgid "Select a booking to see details."
+msgstr "დეტალების სანახავად აირჩიეთ ჯავშანი."
+
+#: templates/dashboard/home.html
+msgid "Your salons"
+msgstr "თქვენი სალონები"
+
+#: templates/dashboard/home.html
+msgid ""
+"Your account isn't linked to a salon yet. Ask the salon owner to add you as "
+"a staff member."
+msgstr ""
+"თქვენი ანგარიში ჯერ არ არის დაკავშირებული სალონთან. სთხოვეთ სალონის "
+"მფლობელს, დაგამატოთ თანამშრომლად."
+
+#: templates/dashboard/partials/_delta.html
+msgid "no data for the previous period"
+msgstr "წინა პერიოდის მონაცემები არ არის"
+
+#: templates/dashboard/partials/_delta.html
+msgid "vs previous period"
+msgstr "წინა პერიოდთან შედარებით"
+
+#: templates/dashboard/partials/_delta.html
+msgid "same as previous period"
+msgstr "წინა პერიოდის ტოლია"
+
+#: templates/dashboard/partials/booking_detail.html
+#: templates/notifications/email.html templates/notifications/email.txt
+msgid "When"
+msgstr "როდის"
+
+#: templates/dashboard/partials/booking_detail.html
+#: templates/dashboard/partials/calendar_grid.html
+#: templates/notifications/email.html templates/notifications/email.txt
+msgid "Specialist"
+msgstr "სპეციალისტი"
+
+#: templates/dashboard/partials/booking_detail.html
+msgid "Phone"
+msgstr "ტელეფონი"
+
+#: templates/dashboard/partials/booking_detail.html
+msgid "Notes"
+msgstr "შენიშვნები"
+
+#: templates/dashboard/partials/booking_detail.html
+msgid "Cancel this booking? This frees the time slot and cannot be undone."
+msgstr ""
+"გავაუქმოთ ეს ჯავშანი? დრო გათავისუფლდება და ამ მოქმედებას ვერ დააბრუნებთ."
+
+#: templates/dashboard/partials/booking_detail.html
+msgid "Confirm"
+msgstr "დადასტურება"
+
+#: templates/dashboard/partials/booking_detail.html
+msgid "Mark completed"
+msgstr "დასრულებულად მონიშვნა"
+
+#: templates/dashboard/partials/booking_detail.html
+msgid "Mark no-show"
+msgstr "გამოუცხადებლად მონიშვნა"
+
+#: templates/dashboard/partials/booking_detail.html
+msgid "Cancel booking"
+msgstr "ჯავშნის გაუქმება"
+
+#: templates/dashboard/partials/calendar_grid.html
+msgid "Previous week"
+msgstr "წინა კვირა"
+
+#: templates/dashboard/partials/calendar_grid.html
+msgid "Today"
+msgstr "დღეს"
+
+#: templates/dashboard/partials/calendar_grid.html
+msgid "Next week"
+msgstr "შემდეგი კვირა"
+
+#: templates/dashboard/partials/calendar_grid.html
+msgid "All specialists"
+msgstr "ყველა სპეციალისტი"
+
+#: templates/dashboard/partials/calendar_grid.html
+msgid "Show"
+msgstr "ჩვენება"
+
+#: templates/dashboard/partials/calendar_grid.html
+msgid "Columns in each day, left to right:"
+msgstr "თითოეული დღის სვეტები, მარცხნიდან მარჯვნივ:"
+
+#: templates/includes/language_switcher.html
+msgid "Language"
+msgstr "ენა"
+
+#: templates/notifications/email.html templates/notifications/email.txt
+#, python-format
+msgid "Hello %(name)s,"
+msgstr "გამარჯობა, %(name)s!"
+
+#: templates/notifications/email.html templates/notifications/email.txt
+msgid "Your booking is confirmed."
+msgstr "თქვენი ჯავშანი დადასტურებულია."
+
+#: templates/notifications/email.html templates/notifications/email.txt
+msgid "This is a reminder of your upcoming appointment."
+msgstr "შეგახსენებთ თქვენს მომავალ ვიზიტს."
+
+#: templates/notifications/email.html templates/notifications/email.txt
+msgid "See you soon! Your appointment starts shortly."
+msgstr "მალე გნახავთ! თქვენი ვიზიტი მალე იწყება."
+
+#: templates/notifications/email.html templates/notifications/email.txt
+msgid "Price"
+msgstr "ფასი"
+
+#: templates/notifications/email.html templates/notifications/email.txt
+msgid "Where"
+msgstr "სად"
+
+#: templates/notifications/email.html templates/notifications/email.txt
+#, python-format
+msgid "Need to change or cancel? Call us at %(phone)s."
+msgstr "ცვლილება ან გაუქმება გსურთ? დაგვირეკეთ: %(phone)s."
+
+#: templates/notifications/sms.txt
+#, python-format
+msgid "%(salon)s: booking confirmed — %(service)s, %(day)s at %(time)s."
+msgstr "%(salon)s: ჯავშანი დადასტურებულია — %(service)s, %(day)s, %(time)s."
+
+#: templates/notifications/sms.txt
+#, python-format
+msgid "%(salon)s: reminder — %(service)s on %(day)s at %(time)s."
+msgstr "%(salon)s: შეხსენება — %(service)s, %(day)s, %(time)s."
+
+#: templates/notifications/sms.txt
+#, python-format
+msgid "%(salon)s: see you soon — %(service)s at %(time)s."
+msgstr "%(salon)s: მალე გნახავთ — %(service)s, %(time)s."
+
+#: templates/notifications/sms.txt
+#, python-format
+msgid "Questions: %(phone)s"
+msgstr "კითხვები: %(phone)s"
+
+#: templates/notifications/subject.txt
+#, python-format
+msgid "Your booking at %(salon)s is confirmed"
+msgstr "თქვენი ჯავშანი სალონში „%(salon)s“ დადასტურებულია"
+
+#: templates/notifications/subject.txt
+#, python-format
+msgid "Reminder: your appointment at %(salon)s"
+msgstr "შეხსენება: თქვენი ვიზიტი სალონში „%(salon)s“"
+
+#: templates/registration/login.html
+msgid "Log in"
+msgstr "შესვლა"
+
+#: templates/registration/login.html
+msgid "Log in to your dashboard"
+msgstr "მართვის პანელში შესვლა"
+
+#: templates/registration/login.html
+msgid "Wrong username or password."
+msgstr "მომხმარებლის სახელი ან პაროლი არასწორია."
+
+#: templates/registration/login.html
+msgid "Username"
+msgstr "მომხმარებლის სახელი"
+
+#: templates/registration/login.html
+msgid "Password"
+msgstr "პაროლი"

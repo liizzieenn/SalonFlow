@@ -286,6 +286,10 @@ def test_analytics_page(world):
     assert response.context["days"] == 30
     assert response.context["summary"].attended == 1
     assert response.context["chart_data"]["services"]["labels"] == ["Haircut"]
+    first_day = response.context["by_day"][0][0]
+    assert response.context["chart_data"]["revenue"]["labels"][0] == (
+        f"{first_day.day} {first_day:%b}"  # English page: "16 Oct"
+    )
 
 
 @pytest.mark.parametrize(

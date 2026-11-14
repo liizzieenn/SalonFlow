@@ -73,6 +73,8 @@ class ClientFactory(factory.django.DjangoModelFactory):
 
     salon = factory.SubFactory(SalonFactory)
     full_name = factory.Sequence(lambda n: f"Client {n}")
+    # The model defaults to Georgian; tests assert English unless they opt in.
+    preferred_language = "en"
     phone = factory.Sequence(lambda n: f"+99555500{n:04d}")
 
 

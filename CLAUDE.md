@@ -55,7 +55,17 @@ indexing (`knowledge.py`, Celery `tasks.py`, `signals.py`), RAG chat (`chat.py`)
 salon-bound `find_free_slots` tool, providers in `providers/` (fake / anthropic /
 voyage), rate limiting (`ratelimit.py`), HTMX widget (`{% assistant_widget salon %}`).
 
+M6 done: Georgian default (unprefixed) / English (`/en/`) via `i18n_patterns`; switcher
+(`apps/core/views.set_language`); full `ka` catalogue (`.po` + committed `.mo`); clients'
+`preferred_language` captured at booking and used for notifications; `tests/test_i18n.py`
+gates CI on catalogue completeness.
+
 Notes:
+- i18n: after adding/changing any user-facing string run makemessages + translate +
+  compilemessages (commands in README) — CI fails otherwise. Tests run in English by
+  default (`tests/conftest.py`); Georgian behaviour lives in `tests/test_i18n.py`.
+  Never `capfirst`/`upper` Georgian text (Python maps it to Mtavruli capitals).
+- Assistant knowledge text is always built in English (`translation.override("en")`).
 - Assistant: retrieval and the slot tool are always salon-scoped; never trust model
   output for URLs or ids from other salons. Dev/tests use fake providers (no keys).
 - `EMBEDDING_DIMENSIONS` (1024) is baked into the migration; changing the embedding
@@ -71,5 +81,5 @@ Notes:
 - Tests require PostgreSQL (not SQLite).
 
 ## Next step
-Start M6: i18n — Georgian/English language switcher (i18n_patterns or session),
-`makemessages`/`compilemessages`, Georgian translations for all UI, emails and SMS.
+Start M7: ship — compiled Tailwind build (drop the Play CDN), production deployment
+(VPS + docker compose, HTTPS), demo data command, screenshots and a live demo link.

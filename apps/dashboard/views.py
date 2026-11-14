@@ -10,6 +10,7 @@ from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.bookings.models import Booking
@@ -168,7 +169,9 @@ def analytics(request: HttpRequest, access: SalonAccess) -> HttpResponse:
         "services": services,
         "chart_data": {
             "revenue": {
-                "labels": [d.isoformat() for d, _ in by_day],
+                # Localised on the server (Django's locale data), not with JS Intl,
+                # whose Georgian data is missing from some browser builds.
+                "labels": [date_format(d, "j M") for d, _ in by_day],
                 "values": [float(v) for _, v in by_day],
             },
             "hours": {
