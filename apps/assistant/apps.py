@@ -6,3 +6,6 @@ class AssistantConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.assistant"
     verbose_name = _("AI assistant")
+
+    def ready(self) -> None:
+        from . import signals  # noqa: F401
