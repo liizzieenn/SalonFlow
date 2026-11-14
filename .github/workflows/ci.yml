@@ -102,14 +102,19 @@ jobs:
       - name: Smoke test over HTTPS through Caddy
         run: |
           set -euo pipefail
+          # Fetch into a variable, then grep: piping curl into `grep -q` breaks the
+          # pipe when grep exits early (curl exit 23), which --retry and pipefail
+          # turn into a spurious failure.
           k() { curl -fsSk --retry 5 --retry-all-errors --retry-delay 2 "$@"; }
+          has() { grep -q -- "$2" <<<"$1" || { echo "missing: $2"; exit 1; }; }
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost/s/demo/book/)" = 308
-          k https://localhost/health/ | grep -q '"db": true'
-          k https://localhost/s/demo/book/ | grep -q 'აირჩიეთ მომსახურება'
-          k https://localhost/en/s/demo/book/ | grep -q 'Choose a service'
-          css=$(k https://localhost/s/demo/book/ | grep -o '/static/css/app\.[0-9a-f]*\.css')
-          k -I "https://localhost$css" | grep -qi 'cache-control: max-age=315360000'
-          k -I https://localhost/s/demo/book/ | grep -qi 'strict-transport-security'
+          has "$(k https://localhost/health/)" '"db": true'
+          ka=$(k https://localhost/s/demo/book/)
+          has "$ka" 'აირჩიეთ მომსახურება'
+          has "$(k https://localhost/en/s/demo/book/)" 'Choose a service'
+          css=$(grep -o '/static/css/app\.[0-9a-f]*\.css' <<<"$ka")
+          has "$(k -I "https://localhost$css")" 'max-age=315360000'
+          has "$(k -I https://localhost/s/demo/book/)" 'strict-transport-security'
       - name: Celery worker answers
         run: >
           docker compose -f docker-compose.prod.yml exec -T celery
