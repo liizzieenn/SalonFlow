@@ -4,6 +4,8 @@
 
 Clients book appointments online in Georgian or English, get automatic reminders, and can ask an AI assistant about services, prices and availability. Salon owners manage staff schedules and see revenue / occupancy analytics in a dashboard.
 
+[![CI](https://github.com/liizzieenn/salonflow/actions/workflows/ci.yml/badge.svg)](https://github.com/liizzieenn/salonflow/actions/workflows/ci.yml)
+
 > 🚧 Work in progress — see [Roadmap](#roadmap).
 
 ## Features
@@ -46,7 +48,7 @@ Client (browser) ──► Django (HTMX views + REST API)
 
 ## Roadmap
 
-- [ ] **M1 — Core:** project setup, Docker, models (Salon, Staff, Service, Booking, Client), admin
+- [x] **M1 — Core:** project setup, Docker, models (Salon, Staff, Service, Booking, Client), admin
 - [ ] **M2 — Booking engine:** free-slot calculation, booking flow, conflict prevention, tests
 - [ ] **M3 — Notifications:** Celery + Redis, email/SMS reminders
 - [ ] **M4 — Dashboard:** owner calendar + analytics charts
@@ -56,14 +58,64 @@ Client (browser) ──► Django (HTMX views + REST API)
 
 ## Getting started
 
+### With Docker (recommended)
+
 ```bash
 git clone https://github.com/liizzieenn/salonflow.git
 cd salonflow
 cp .env.example .env
 docker compose up --build
+docker compose exec web python manage.py createsuperuser
 ```
 
-App: http://localhost:8000
+App: http://localhost:8000 · Admin: http://localhost:8000/admin/ · Health: http://localhost:8000/health/
+
+### Without Docker
+
+Requires Python 3.12+, PostgreSQL 16 and Redis.
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements/dev.txt
+cp .env.example .env   # point DATABASE_URL / REDIS_URL at localhost
+python manage.py migrate
+python manage.py runserver
+```
+
+### Tests & code quality
+
+```bash
+pytest                 # runs against PostgreSQL (needed for exclusion constraints)
+pytest --cov           # with coverage
+ruff check . && black --check .
+```
+
+## Project structure
+
+```
+config/              settings (base / dev / test / prod), urls, celery app
+apps/
+  core/              shared abstract models (timestamps, salon scoping), health check
+  accounts/          custom User model
+  salons/            Salon, Service, Staff, WorkingHours, Break, TimeOff
+  clients/           per-salon Client profiles
+  bookings/          Booking + double-booking protection
+  notifications/     Celery reminder tasks (M3)
+  dashboard/         owner analytics (M4)
+  assistant/         RAG AI chat (M5)
+tests/               pytest suite + factory_boy factories
+docker/              container entrypoint
+```
+
+### Data integrity highlights
+
+- **No double-booking, enforced by PostgreSQL:** an `EXCLUDE USING gist` constraint
+  (`btree_gist`) rejects any two non-cancelled bookings of the same staff member whose
+  `[start, end)` ranges overlap — safe even under concurrent requests.
+- **Multi-tenant by design:** every domain model is scoped to a `Salon`; model
+  validation rejects bookings that mix clients, staff or services from different salons.
+- Check constraints for valid time ranges, durations and prices; unique client phone
+  per salon.
 
 ## Author
 
