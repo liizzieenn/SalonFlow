@@ -1,0 +1,13 @@
+{% load i18n %}{% blocktrans with name=booking.client.full_name %}Hello {{ name }},{% endblocktrans %}
+
+{% if kind == Kind.CONFIRMATION %}{% trans "Your booking is confirmed." %}{% elif kind == Kind.REMINDER_24H %}{% trans "This is a reminder of your upcoming appointment." %}{% else %}{% trans "See you soon! Your appointment starts shortly." %}{% endif %}
+
+{% trans "Service" %}: {{ booking.service.name }}
+{% trans "Specialist" %}: {{ booking.staff.full_name }}
+{% trans "When" %}: {{ booking.start_at|date:"l, j F Y" }} {{ booking.start_at|time:"H:i" }}
+{% trans "Price" %}: {{ booking.price }} ₾
+{% trans "Where" %}: {{ salon.name }}{% if salon.address %}, {{ salon.address }}{% endif %}{% if salon.city %}, {{ salon.city }}{% endif %}
+
+{% if salon.phone %}{% blocktrans with phone=salon.phone %}Need to change or cancel? Call us at {{ phone }}.{% endblocktrans %}{% endif %}
+
+{{ salon.name }}

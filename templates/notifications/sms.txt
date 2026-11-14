@@ -1,0 +1,6 @@
+{% load i18n %}{% with service=booking.service.name day=booking.start_at|date:"d.m" time=booking.start_at|time:"H:i" %}
+{% if kind == Kind.CONFIRMATION %}{% blocktrans with salon=salon.name %}{{ salon }}: booking confirmed — {{ service }}, {{ day }} at {{ time }}.{% endblocktrans %}
+{% elif kind == Kind.REMINDER_24H %}{% blocktrans with salon=salon.name %}{{ salon }}: reminder — {{ service }} on {{ day }} at {{ time }}.{% endblocktrans %}
+{% else %}{% blocktrans with salon=salon.name %}{{ salon }}: see you soon — {{ service }} at {{ time }}.{% endblocktrans %}{% endif %}
+{% if salon.phone %}{% blocktrans with phone=salon.phone %}Questions: {{ phone }}{% endblocktrans %}{% endif %}
+{% endwith %}
