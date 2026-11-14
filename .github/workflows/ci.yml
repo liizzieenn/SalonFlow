@@ -60,3 +60,67 @@ jobs:
         run: python manage.py check --fail-level WARNING
       - name: Run tests
         run: pytest --create-db --cov --cov-report=term-missing
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build Tailwind CSS
+        run: npm run build
+      - name: Check the build picked up template and Python classes
+        run: |
+          test -s static/css/app.css
+          grep -q 'bg-rose-600' static/css/app.css        # templates
+          grep -q 'focus\\:ring-rose-400' static/css/app.css  # apps/bookings/forms.py
+
+  prod-stack:
+    # Builds the production image and runs the real stack (Caddy → gunicorn, Celery
+    # worker + beat, Postgres, Redis) to catch what unit tests can't: missing runtime
+    # dependencies, broken health checks, proxy/HTTPS settings.
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Write a throwaway production .env
+        run: |
+          cat > .env <<ENV
+          DOMAIN=localhost
+          ACME_EMAIL=ci@example.com
+          DJANGO_SECRET_KEY=$(openssl rand -hex 32)
+          POSTGRES_PASSWORD=$(openssl rand -hex 16)
+          EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+          ENV
+      - name: Build and start the stack
+        run: docker compose -f docker-compose.prod.yml up -d --build --wait --wait-timeout 240
+      - name: Seed demo data
+        run: docker compose -f docker-compose.prod.yml exec -T web python manage.py seed_demo
+      - name: Smoke test over HTTPS through Caddy
+        run: |
+          set -euo pipefail
+          # Fetch into a variable, then grep: piping curl into `grep -q` breaks the
+          # pipe when grep exits early (curl exit 23), which --retry and pipefail
+          # turn into a spurious failure.
+          k() { curl -fsSk --retry 5 --retry-all-errors --retry-delay 2 "$@"; }
+          has() { grep -q -- "$2" <<<"$1" || { echo "missing: $2"; exit 1; }; }
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost/s/demo/book/)" = 308
+          has "$(k https://localhost/health/)" '"db": true'
+          ka=$(k https://localhost/s/demo/book/)
+          has "$ka" 'აირჩიეთ მომსახურება'
+          has "$(k https://localhost/en/s/demo/book/)" 'Choose a service'
+          css=$(grep -o '/static/css/app\.[0-9a-f]*\.css' <<<"$ka")
+          has "$(k -I "https://localhost$css")" 'max-age=315360000'
+          has "$(k -I https://localhost/s/demo/book/)" 'strict-transport-security'
+      - name: Celery worker answers
+        run: >
+          docker compose -f docker-compose.prod.yml exec -T celery
+          sh -c 'celery -A config inspect ping -d celery@$HOSTNAME --timeout 10'
+      - name: Django deployment checks
+        run: docker compose -f docker-compose.prod.yml exec -T web python manage.py check --deploy --fail-level ERROR
+      - name: Logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.prod.yml logs --tail 100

@@ -12,3 +12,5 @@ htmlcov
 staticfiles
 media
 node_modules
+static/css
+docs/screenshots

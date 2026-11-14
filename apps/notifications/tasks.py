@@ -20,7 +20,7 @@ from celery import shared_task
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
-from django.db.models import Exists, F, OuterRef
+from django.db.models import Exists, F, OuterRef, Q
 from django.utils import timezone
 
 from apps.bookings.models import Booking
@@ -164,7 +164,9 @@ def due_reminders(now: datetime) -> list[tuple[int, str]]:
     """``(booking_id, kind)`` pairs whose reminder should be queued at ``now``.
 
     A reminder is skipped when the booking was made after its send time (the
-    confirmation already covered it) or when it has already been queued/sent.
+    confirmation already covered it), when it has already been queued/sent, or
+    when the client has no email or phone (nothing to send; without this such a
+    booking would be re-queued on every beat run, since no delivery row is made).
     """
     due: list[tuple[int, str]] = []
     for kind, lead, next_lead in reminder_windows():
@@ -176,6 +178,7 @@ def due_reminders(now: datetime) -> list[tuple[int, str]]:
                 start_at__lte=now + lead,
                 created_at__lt=F("start_at") - lead,
             )
+            .filter(Q(client__email__gt="") | Q(client__phone__gt=""))
             .exclude(Exists(already))
             .values_list("pk", flat=True)
         )

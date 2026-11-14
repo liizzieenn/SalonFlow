@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.formats import date_format
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_POST, require_safe
 
 from apps.bookings.models import Booking
 from apps.bookings.services import (
@@ -45,7 +45,7 @@ def _render(request, access: SalonAccess, template: str, context: dict, **kw):
 
 
 @login_required
-@require_GET
+@require_safe
 def home(request: HttpRequest) -> HttpResponse:
     salons = list(accessible_salons(request.user))
     if len(salons) == 1:
@@ -54,7 +54,7 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 @salon_view()
-@require_GET
+@require_safe
 def calendar(request: HttpRequest, access: SalonAccess) -> HttpResponse:
     try:
         week = week_start_for(date.fromisoformat(request.GET["week"]))
@@ -114,7 +114,7 @@ def _detail(request, access, booking, *, error: str = "", **kw) -> HttpResponse:
 
 
 @salon_view()
-@require_GET
+@require_safe
 def booking_detail(request: HttpRequest, access: SalonAccess, pk: int) -> HttpResponse:
     return _detail(request, access, _booking_for(access, pk))
 
@@ -143,7 +143,7 @@ def _pct(value: float | None) -> float | None:
 
 
 @salon_view(owner_only=True)
-@require_GET
+@require_safe
 def analytics(request: HttpRequest, access: SalonAccess) -> HttpResponse:
     raw = request.GET.get("days", "")
     days = int(raw) if raw.isdigit() and int(raw) in RANGES else DEFAULT_RANGE

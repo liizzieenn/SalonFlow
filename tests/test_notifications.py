@@ -258,6 +258,12 @@ def test_no_reminder_for_cancelled_or_already_notified(booking):
     assert due_reminders(now) == []
 
 
+def test_no_reminder_for_client_without_contact_details():
+    start = NOW + timedelta(hours=1)
+    make_booking(start, created=start - timedelta(days=5), email="", phone="")
+    assert due_reminders(NOW) == []
+
+
 def test_dispatch_sends_due_reminders_once(booking):
     with mock.patch(
         "django.utils.timezone.now", return_value=booking.start_at - timedelta(hours=1)

@@ -12,6 +12,7 @@ from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from apps.core.net import client_ip
 from apps.salons.models import Salon
 
 from . import ratelimit
@@ -29,12 +30,6 @@ def history_key(salon: Salon) -> str:
 
 def get_history(request: HttpRequest, salon: Salon) -> list[dict]:
     return request.session.get(history_key(salon), [])
-
-
-def _client_ip(request: HttpRequest) -> str:
-    # Behind the reverse proxy REMOTE_ADDR is set from X-Forwarded-For by the
-    # proxy config; never trust a client-supplied header here.
-    return request.META.get("REMOTE_ADDR", "unknown")
 
 
 def _reply(request, salon, messages: list[dict], *, status: int = 200) -> HttpResponse:
@@ -66,7 +61,7 @@ def chat(request: HttpRequest, salon_slug: str) -> HttpResponse:
                 request, salon, [{"role": "error", "content": error}], status=400
             )
         if not ratelimit.check(
-            client=_client_ip(request),
+            client=client_ip(request),
             salon_id=salon.pk,
             limits=settings.ASSISTANT_RATE_LIMITS,
         ):

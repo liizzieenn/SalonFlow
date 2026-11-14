@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}SalonFlow{% endblock %}</title>
-  {# Tailwind Play CDN for now; replaced by a compiled build in M7. #}
-  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  {# Compiled by the Tailwind CLI: `npm run build` (static/src/app.css). #}
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
   {% block extra_head %}{% endblock %}
 </head>

@@ -1,0 +1,13 @@
+/*
+ * SalonFlow styles — compiled by the Tailwind CLI (`npm run build`).
+ * Only the sources below are scanned: templates, and Python files that build
+ * class strings (e.g. form widget classes in the bookings forms).
+ */
+@import "tailwindcss" source(none);
+
+@source "../../templates";
+@source "../../apps";
+
+/* htmx: hide request indicators until a request is in flight. */
+.htmx-indicator { display: none; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator { display: block; }

@@ -265,3 +265,8 @@ def test_confirm_tampered_service_404(client, setup, day):
 def test_confirm_get_not_allowed(client, setup):
     salon, *_ = setup
     assert client.get(url("confirm", salon)).status_code == 405
+
+
+def test_head_requests_allowed_for_uptime_monitors(client, setup):
+    salon, *_ = setup
+    assert client.head(url("services", salon)).status_code == 200

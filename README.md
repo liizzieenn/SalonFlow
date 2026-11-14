@@ -5,56 +5,96 @@
 Clients book appointments online in Georgian or English, get automatic reminders, and can ask an AI assistant about services, prices and availability. Salon owners manage staff schedules and see revenue / occupancy analytics in a dashboard.
 
 [![CI](https://github.com/liizzieenn/salonflow/actions/workflows/ci.yml/badge.svg)](https://github.com/liizzieenn/salonflow/actions/workflows/ci.yml)
+[![Deploy](https://github.com/liizzieenn/salonflow/actions/workflows/deploy.yml/badge.svg)](https://github.com/liizzieenn/salonflow/actions/workflows/deploy.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB?logo=python&logoColor=white)
+![Django 5.2](https://img.shields.io/badge/django-5.2-092E20?logo=django&logoColor=white)
+![PostgreSQL 16 + pgvector](https://img.shields.io/badge/postgres-16%20%2B%20pgvector-4169E1?logo=postgresql&logoColor=white)
+![HTMX](https://img.shields.io/badge/htmx-2-3366CC)
+![Tailwind CSS 4](https://img.shields.io/badge/tailwind-4-06B6D4?logo=tailwindcss&logoColor=white)
+![Languages: ka / en](https://img.shields.io/badge/i18n-ქართული%20%2F%20English-8A2BE2)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-> 🚧 Work in progress — see [Roadmap](#roadmap).
+## Live demo
+
+> **🔗 Live demo:** _coming soon — the server deploy is the last step of M7 ([deploy guide](docs/deploy.md))._
+
+| What | Where | Login |
+|---|---|---|
+| Client booking page (Georgian / English) | `/s/demo/book/` · `/en/s/demo/book/` | — |
+| Owner dashboard (calendar + analytics) | `/dashboard/` | `demo` / `salonflow-demo` |
+| Staff view (own bookings only) | `/dashboard/` | `demo-staff` / `salonflow-demo` |
+
+The demo salon is rebuilt nightly with `manage.py seed_demo --reset`, so feel free to
+book, cancel and mark no-shows. Demo clients have no phone numbers or emails, so no
+real person is ever messaged. Run the same demo locally in two commands; see
+[Getting started](#getting-started).
+
+## Screenshots
+
+| Booking flow | AI assistant (Georgian, with free-time suggestions) |
+|---|---|
+| ![Choosing a time in the booking flow](docs/screenshots/booking.png) | ![Assistant answering in Georgian and suggesting free times](docs/screenshots/assistant.png) |
+
+| Owner calendar | Analytics |
+|---|---|
+| ![Week calendar with a fixed column per specialist and a booking detail panel](docs/screenshots/calendar.png) | ![Revenue, bookings, no-show rate and charts](docs/screenshots/analytics.png) |
+
+<p align="center"><img src="docs/screenshots/mobile.png" alt="Booking page on a phone, in Georgian" width="300"></p>
 
 ## Features
 
 **For clients**
-- Browse services, prices and staff
-- Book, reschedule or cancel an appointment in real-time free slots
-- Email / SMS reminders 24h and 2h before the visit
-- AI chat assistant (RAG) that answers questions about services and can suggest free slots
-- Georgian 🇬🇪 / English 🇬🇧 interface
+- Browse services, prices and specialists; book a real free time in a few taps
+- Confirmation plus email / SMS reminders 24 h and 2 h before the visit
+- AI chat assistant (RAG) that answers from the salon's own data, cites its sources and
+  suggests free times that link straight into the booking flow
+- Georgian 🇬🇪 (default) / English 🇬🇧 interface; notifications in the client's language
 
 **For salon owners & staff**
 - Staff working hours, breaks and days off
-- Calendar view of all bookings
-- Analytics: revenue, busiest hours, top services, no-show rate
-- Multi-salon (multi-tenant) support
+- Week calendar of all bookings; mark visits completed / no-show or cancel
+- Analytics: revenue, busiest hours, top services, no-show and cancellation rates
+- Multi-tenant: every salon's data is isolated; staff see only their own bookings
 
 ## Tech stack
 
 | Layer | Tech |
 |---|---|
-| Backend | Python 3.12, Django 5, Django REST Framework |
-| Database | PostgreSQL 16 + pgvector |
-| Background jobs | Celery + Redis (reminders, embeddings) |
-| AI | RAG over salon services/FAQ, pgvector embeddings (Voyage AI), Claude API with tool use |
-| Frontend | Django templates + HTMX + Tailwind CSS |
-| Auth | django-allauth (email + Google) |
-| Infra | Docker, docker-compose, GitHub Actions CI, deployed on a VPS |
-| Testing | pytest, pytest-django, factory_boy |
+| Backend | Python 3.12, Django 5.2 |
+| Database | PostgreSQL 16 + pgvector (HNSW), `btree_gist` exclusion constraint |
+| Background jobs | Celery worker + beat, Redis (reminders, re-embedding) |
+| AI | RAG over services/FAQ, Voyage AI embeddings, Claude API with tool use |
+| Frontend | Django templates + HTMX 2 + Tailwind CSS 4 (compiled), Chart.js |
+| Auth | Django auth (owner / staff roles per salon) |
+| i18n | gettext, Georgian default + English, CI translation gate |
+| Infra | Docker, Caddy (automatic HTTPS), gunicorn, GitHub Actions (CI + SSH deploy) |
+| Testing | pytest, pytest-django, factory_boy, Playwright checks, full-stack smoke test in CI |
 
 ## Architecture
 
-```
-Client (browser) ──► Django (HTMX views + REST API)
-                        │
-                        ├── PostgreSQL (+ pgvector)
-                        ├── Redis ──► Celery workers (reminders, embeddings)
-                        └── LLM API (AI assistant)
+```mermaid
+flowchart LR
+    browser["Browser<br/>HTMX + Tailwind"] -->|HTTPS| caddy["Caddy<br/>automatic TLS"]
+    caddy --> web["Django + gunicorn<br/>booking flow · dashboard · assistant"]
+    web --> pg[("PostgreSQL 16<br/>+ pgvector")]
+    web --> redis[("Redis<br/>broker · cache · rate limits")]
+    beat["Celery beat<br/>every 5 min"] --> redis
+    redis --> worker["Celery worker"]
+    worker --> pg
+    worker -->|confirmations, reminders| notify["Email (SMTP)<br/>SMS (Twilio)"]
+    worker -->|re-embed on change| voyage["Voyage AI<br/>embeddings"]
+    web -->|RAG chat + find_free_slots tool| claude["Claude API"]
+    web -->|query embedding| voyage
 ```
 
-## Roadmap
-
-- [x] **M1 — Core:** project setup, Docker, models (Salon, Staff, Service, Booking, Client), admin
-- [x] **M2 — Booking engine:** free-slot calculation, booking flow, conflict prevention, tests
-- [x] **M3 — Notifications:** Celery + Redis, email/SMS reminders
-- [x] **M4 — Dashboard:** owner calendar + analytics charts
-- [x] **M5 — AI assistant:** pgvector embeddings, RAG chat over services/FAQ, slot suggestions
-- [x] **M6 — i18n:** Georgian / English
-- [ ] **M7 — Ship:** CI, deployment, demo data, screenshots, live demo link
+- **One Docker image** runs the web app, the Celery worker and beat; a multi-stage
+  build compiles the Tailwind CSS and collects hashed static files (served by whitenoise).
+- **Booking is safe under concurrency:** a row lock serialises bookings per specialist,
+  and a PostgreSQL exclusion constraint makes double-booking impossible even if that is
+  bypassed.
+- **The assistant can't leak another salon's data:** retrieval and the slot tool are
+  bound to one salon, and booking links are built by the app, never by the model.
 
 ## Getting started
 
@@ -65,20 +105,22 @@ git clone https://github.com/liizzieenn/salonflow.git
 cd salonflow
 cp .env.example .env
 docker compose up --build
-docker compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py seed_demo      # demo salon + logins
 ```
 
 App: http://localhost:8000 · Booking page: http://localhost:8000/s/&lt;salon-slug&gt;/book/ (English: `/en/s/…`) · Dashboard: http://localhost:8000/dashboard/ · Admin: http://localhost:8000/admin/ · Health: http://localhost:8000/health/
 
 ### Without Docker
 
-Requires Python 3.12+, PostgreSQL 16 and Redis.
+Requires Python 3.12+, Node 22, PostgreSQL 16 (with pgvector) and Redis.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements/dev.txt
+npm install && npm run build   # Tailwind CSS (`npm run dev` to watch)
 cp .env.example .env   # point DATABASE_URL / REDIS_URL at localhost
 python manage.py migrate
+python manage.py seed_demo
 python manage.py runserver
 ```
 
@@ -95,7 +137,7 @@ ruff check . && black --check .
 ```
 config/              settings (base / dev / test / prod), urls, celery app
 apps/
-  core/              shared abstract models (timestamps, salon scoping), health check
+  core/              shared models, health check, language switch, seed_demo
   accounts/          custom User model
   salons/            Salon, Service, Staff, WorkingHours, Break, TimeOff
   clients/           per-salon Client profiles
@@ -104,8 +146,12 @@ apps/
   dashboard/         owner/staff calendar, booking status, analytics
   assistant/         RAG chat: FAQ, pgvector index, pluggable LLM/embeddings
 tests/               pytest suite + factory_boy factories
-docker/              container entrypoint
+docker/              entrypoint, gunicorn config
+deploy/              Caddyfile, server deploy script
+docs/                deploy guide, screenshots
 ```
+
+## How it works
 
 ### Booking engine
 
@@ -218,6 +264,23 @@ python manage.py compilemessages -l ka --ignore=.venv
   validation rejects bookings that mix clients, staff or services from different salons.
 - Check constraints for valid time ranges, durations and prices; unique client phone
   per salon.
+
+## Deployment
+
+Production runs `docker-compose.prod.yml` on a single VPS: Caddy (automatic HTTPS) →
+gunicorn, Celery worker + beat, PostgreSQL + pgvector and Redis. Pushes to `main` deploy
+automatically over SSH once CI is green. Step-by-step guide: **[docs/deploy.md](docs/deploy.md)**.
+
+## Roadmap
+
+- [x] **M1 — Core:** project setup, Docker, models (Salon, Staff, Service, Booking, Client), admin
+- [x] **M2 — Booking engine:** free-slot calculation, booking flow, conflict prevention, tests
+- [x] **M3 — Notifications:** Celery + Redis, email/SMS reminders
+- [x] **M4 — Dashboard:** owner calendar + analytics charts
+- [x] **M5 — AI assistant:** pgvector embeddings, RAG chat over services/FAQ, slot suggestions
+- [x] **M6 — i18n:** Georgian / English
+- [ ] **M7 — Ship:** compiled Tailwind ✅, production stack + CI smoke test ✅, deploy workflow ✅,
+  demo data ✅, screenshots ✅ — **live server + demo link** pending
 
 ## Author
 

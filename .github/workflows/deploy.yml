@@ -1,0 +1,75 @@
+name: Deploy
+
+# Deploys main to the VPS over SSH after CI passes (or on demand).
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST         server hostname or IP
+#   DEPLOY_USER         SSH user (member of the docker group)
+#   DEPLOY_SSH_KEY      private key for that user (ed25519, no passphrase)
+#   DEPLOY_KNOWN_HOSTS  output of `ssh-keyscan -t ed25519 <host>` (pins the host key)
+# Optional:
+#   DEPLOY_PATH (secret, default /opt/salonflow), DEPLOY_PORT (secret, default 22)
+#   LIVE_DEMO_URL (variable) — public URL, used for the post-deploy health check.
+# Until DEPLOY_HOST is set the workflow skips the deploy instead of failing.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.LIVE_DEMO_URL }}
+    steps:
+      - name: Check deploy configuration
+        id: config
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::DEPLOY_HOST is not set; skipping deploy (see docs/deploy.md)."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy over SSH
+        if: steps.config.outputs.configured == 'true'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT:-22}" \
+              -o StrictHostKeyChecking=yes -o BatchMode=yes \
+              "$DEPLOY_USER@$DEPLOY_HOST" \
+              "cd '${DEPLOY_PATH:-/opt/salonflow}' && ./deploy/deploy.sh"
+
+      - name: Health check
+        if: steps.config.outputs.configured == 'true' && vars.LIVE_DEMO_URL != ''
+        env:
+          URL: ${{ vars.LIVE_DEMO_URL }}
+        run: curl -fsS --retry 10 --retry-delay 6 --retry-all-errors "${URL%/}/health/"

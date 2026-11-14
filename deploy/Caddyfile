@@ -1,0 +1,28 @@
+# Caddy obtains and renews the TLS certificate for {$DOMAIN} automatically
+# (Let's Encrypt / ZeroSSL). Ports 80 and 443 must be reachable.
+{
+	email {$ACME_EMAIL}
+	# Pin the admin API to IPv4 loopback: the container health check calls it, and
+	# "localhost" can resolve to ::1 where nothing listens (e.g. on GitHub runners).
+	admin 127.0.0.1:2019
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	# Static files are served (hashed, compressed, long-cached) by whitenoise.
+	reverse_proxy web:8000 {
+		health_uri /health/
+		health_interval 30s
+		# Django's ALLOWED_HOSTS only accepts the public name, not "web:8000".
+		health_headers {
+			Host {$DOMAIN}
+		}
+	}
+
+	header -Server
+	log {
+		output stdout
+		format console
+	}
+}
